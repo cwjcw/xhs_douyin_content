@@ -40,8 +40,9 @@ class Douyin:
         self.go_to_data_center()
         self.close_all_popups()
         if self.safe_click_tougao():
-            if self.click_publish_list():
-                self.click_export_data()  # 在点击“投稿列表”成功后，执行“导出数据”
+            self.click_publish_list()
+            # 如果想在“投稿列表”页面点击“导出数据”，可在此调用
+            self.click_export_data()
 
     def _manual_login(self):
         """增强手动登录流程"""
@@ -163,33 +164,21 @@ class Douyin:
         return self._retry_click(sub_tab_locator, "投稿列表", max_attempts=5)
 
     def click_export_data(self):
-        """
-        点击“导出数据”按钮。
-        根据截图可知它在一个 <button> 标签内，文本也是“导出数据”。
-        """
-        print("🔄 尝试点击 '导出数据' ...")
-
-        # 再次尝试关闭弹窗，避免遮挡
-        # self.close_all_popups()
-
-        # 给页面一些时间来渲染“导出数据”按钮
-        time.sleep(2)
-
-        # 根据截图，button[type='button'] 内包含文本“导出数据”
-        export_data_locator = (By.XPATH, 
+        """点击 '导出数据' 按钮"""
+        print("🔄 尝试点击 '导出数据' 按钮 ...")
+        # 注意这里修正了 'douyn' → 'douyin'
+        locator = (By.XPATH,
             "//button[contains(@class,'douyin-creator-pc-button-tertiary') "
-            "and contains(@class,'douyn-creator-pc-button-with-icon')]"
-            "//span[contains(@class,'x-semi-prop-children') and text()='导出数据']"
+            "and contains(@class,'douyin-creator-pc-button-with-icon') "
+            "and .//span[contains(@class,'x-semi-prop-children') and text()='导出数据']]"
         )
+        # 或者更简单些：只要保证文本命中即可
+        # locator = (By.XPATH, "//button[.//span[text()='导出数据']]")
 
-        # 等待元素可见
-        if not self.wait_for_element_visible(export_data_locator, 15):
-            print("❌ 页面上仍未出现“导出数据”按钮")
-            return False
-
-        # 尝试点击
-        result = self._retry_click(export_data_locator, "导出数据", max_attempts=3)
-        return result
+        if self._retry_click(locator, "导出数据", max_attempts=5):
+            print("✅ 已成功点击“导出数据”按钮")
+        else:
+            print("❌ 点击“导出数据”按钮失败")
 
     def _retry_click(self, locator, element_name, max_attempts=3):
         """带重试机制的点击方法"""
@@ -199,13 +188,14 @@ class Douyin:
                 element = WebDriverWait(self.driver, 10).until(
                     EC.element_to_be_clickable(locator)
                 )
+                self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
                 self.driver.execute_script("arguments[0].click();", element)
                 print(f"✅ 成功点击{element_name}")
                 return True
             except TimeoutException:
                 print(f"⏳ 第{attempt+1}次尝试: 等待{element_name}超时")
             except ElementClickInterceptedException:
-                print(f"🛡️ 第{attempt+1}次尝试: 元素被遮挡")
+                print(f"🛡️ 第{attempt+1}次尝试: {element_name}被遮挡")
                 self._scroll_away()
         print(f"❌ 无法点击{element_name}")
         return False
@@ -251,6 +241,8 @@ class Douyin:
         try:
             self.load_cookies()
             time.sleep(3)
+            # 如果不想在 _post_login_flow() 中点击导出数据
+            # 也可以在这里显式调用 self.click_export_data()
         except Exception as e:
             print(f"❗ 发生未知错误: {str(e)}")
         finally:

@@ -1,6 +1,6 @@
 import pickle
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.edge.service import Service
 from selenium.webdriver.common.by import By
@@ -18,104 +18,99 @@ class Douyin:
         self.driver.maximize_window()
 
     def load_cookies(self):
-        """增强版cookies加载"""
+        """Load cookies for automatic login"""
         try:
             with open(self.cookies_file, "rb") as cookie_file:
                 cookies = pickle.load(cookie_file)
                 self.driver.get(self.url)
                 self.driver.delete_all_cookies()
                 for cookie in cookies:
-                    # expiry需要是整数
                     if 'expiry' in cookie:
                         cookie['expiry'] = int(cookie['expiry'])
                     self.driver.add_cookie(cookie)
                 self.driver.refresh()
-                print("✅ Cookies已加载，自动登录成功！")
+                print("✅ Cookies loaded, auto-login successful!")
                 self._post_login_flow()
         except FileNotFoundError:
             self._manual_login()
 
     def _post_login_flow(self):
-        """登录后统一操作"""
+        """Post-login operations"""
         self.go_to_data_center()
         self.close_all_popups()
-        if self.safe_click_tougao():
-            self.click_publish_list()
+        self.click_export_data_button()
 
     def _manual_login(self):
-        """增强手动登录流程"""
-        print("❌ 未找到cookies，需要手动登录")
+        """Manual login flow"""
+        print("❌ Cookies not found, manual login required")
         self.driver.get(self.url)
-        input("请完成登录后按Enter继续...")  # 这里等待用户手动登录
+        input("Please complete login and press Enter to continue...")
         self._save_cookies()
         self._post_login_flow()
 
     def _save_cookies(self):
-        """保存cookies增强"""
+        """Save cookies after manual login"""
         with open(self.cookies_file, "wb") as cookie_file:
-            # 过滤掉可能会影响后续登录的csrf token
+            # Filter out potentially problematic cookies like csrf tokens
             cookies = [c for c in self.driver.get_cookies() if c['name'] not in ['passport_csrf_token']]
             pickle.dump(cookies, cookie_file)
-        print("✅ 关键cookies已保存")
+        print("✅ Cookies saved successfully")
 
     def go_to_data_center(self):
-        """安全跳转数据中心"""
-        print(f"🚀 正在进入数据中心...")
+        """Navigate to the data center page"""
+        print("🚀 Navigating to data center...")
         self.driver.get(self.data_center_url)
         self.wait_for_page_ready()
 
     def wait_for_page_ready(self, timeout=30):
-        """智能等待页面就绪"""
+        """Wait for the page to be fully loaded"""
         WebDriverWait(self.driver, timeout).until(
             lambda d: d.execute_script("return document.readyState") == 'complete'
         )
-        print("📄 页面加载完成")
+        print("📄 Page loaded successfully")
 
     def close_all_popups(self):
-        """关闭所有类型弹窗（专项优化第三页）"""
-        print("🛡️ 启动弹窗防御机制")
+        """Close all types of popups"""
+        print("🛡️ Starting popup defense mechanism")
         self._close_pagination_popup()
         self._close_knowledge_popup()
         self._close_floating_ads()
         self._close_final_modal()
 
     def _close_pagination_popup(self):
-        """专项优化分页处理（处理1-3页所有情况）"""
+        """Close pagination-related popups"""
         max_attempts = 5
         closed_pages = 0
         
         for attempt in range(max_attempts):
-            # 可以尝试一次匹配多个引导按钮
             button_texts = ["下一页", "立即体验", "我知道了", "完成"]
-            locator = (By.XPATH, 
-                "//button[contains(.,'{}')]".format("') or contains(.,'".join(button_texts)))
+            locator = (By.XPATH, f"//button[contains(.,'{button_texts[0]}') or contains(.,'{button_texts[1]}') or contains(.,'{button_texts[2]}') or contains(.,'{button_texts[3]}')]")
             
-            if self._try_close_popup(locator, f"分页第{closed_pages+1}页", timeout=2):
+            if self._try_close_popup(locator, f"Pagination page {closed_pages + 1}", timeout=2):
                 closed_pages += 1
                 time.sleep(1.2)
-                # 假设最多就3个“下一页”弹窗
                 if closed_pages >= 3:
                     break
             else:
                 break
 
     def _close_knowledge_popup(self):
-        """独立处理游离的我知道了弹窗"""
+        """Close standalone 'I understand' popups"""
         locator = (By.XPATH, "//button[contains(.,'我知道了') and @type='button']")
-        self._try_close_popup(locator, "独立教学弹窗")
+        self._try_close_popup(locator, "Knowledge popup")
 
     def _close_floating_ads(self):
-        """关闭悬浮广告"""
+        """Close floating advertisements"""
         locator = (By.XPATH, "//div[contains(@class,'banner-close')] | //div[contains(@class,'close-icon')]")
-        self._try_close_popup(locator, "悬浮广告")
+        self._try_close_popup(locator, "Floating ads")
 
     def _close_final_modal(self):
-        """最终弹窗清理"""
+        """Close final modal or overlay"""
         locator = (By.XPATH, "//div[@class='modal-close'] | //div[contains(@class,'mask-close')]")
-        self._try_close_popup(locator, "残留蒙层", timeout=1.5)
+        self._try_close_popup(locator, "Final modal", timeout=1.5)
 
     def _try_close_popup(self, locator, name, timeout=8):
-        """优化点击逻辑，返回是否成功关闭"""
+        """Attempt to close a popup with retry logic"""
         try:
             btn = WebDriverWait(self.driver, timeout).until(
                 EC.element_to_be_clickable(locator)
@@ -124,109 +119,91 @@ class Douyin:
                 arguments[0].scrollIntoView({behavior: 'instant', block: 'center'});
                 arguments[0].click();
             """, btn)
-            print(f"✅ 已关闭{name}")
+            print(f"✅ Closed {name}")
             return True
         except TimeoutException:
-            print(f"⏳ 未检测到{name}")
+            print(f"⏳ {name} not detected")
             return False
         except Exception as e:
-            print(f"❌ 关闭{name}失败: {str(e)}")
+            print(f"❌ Failed to close {name}: {str(e)}")
             return False
 
-    def safe_click_tougao(self):
-        """增强版投稿点击"""
-        locator = (By.XPATH, "//div[@role='tab' and normalize-space()='投稿作品']")
-        for attempt in range(3):
+    def click_export_data_button(self):
+        """Click the '导出数据' (Export Data) button"""
+        print("🔄 Attempting to click '导出数据' button...")
+
+        # Define a precise locator for the "导出数据" button based on the HTML snippet
+        export_button_locator = (By.XPATH, "//button[contains(@class,'douyin-creator-pc-button-tertiary') and contains(@class,'douyin-creator-pc-button-with-icon')]//span[contains(@class,'douyin-creator-pc-button-content-right') and text()='导出数据']")
+
+        # Ensure the page is ready and the button is visible/clickable
+        self.wait_for_page_ready()
+        self.close_all_popups()
+
+        # Retry clicking the button with robust error handling
+        for attempt in range(5):
             try:
-                if element := self.wait_for_element_clickable(locator, 15):
-                    self._smart_click(element)
-                    print("🎯 投稿作品点击成功")
-                    return True
-            except ElementClickInterceptedException:
-                print(f"🛡️ 检测到遮挡，第{attempt+1}次重试...")
-                self.close_all_popups()
-                self._scroll_away()
-        print("❌ 多次点击失败")
-        return False
-
-    def click_publish_list(self):
-        """点击 '投稿列表'"""
-        print("🔄 尝试点击 '投稿列表' ...")
-
-        # 确保主内容区域加载完成
-        content_locator = (By.XPATH, "//div[contains(@class,'data-center-content')]")
-        self.wait_for_element_visible(content_locator, 15)
-
-        # 找到 '投稿列表' 并点击
-        sub_tab_locator = (By.XPATH, "//span[contains(text(),'投稿列表')]")
-        return self._retry_click(sub_tab_locator, "投稿列表", max_attempts=5)
-
-    def _retry_click(self, locator, element_name, max_attempts=3):
-        """带重试机制的点击方法"""
-        for attempt in range(max_attempts):
-            self.close_all_popups()
-            try:
-                element = WebDriverWait(self.driver, 10).until(
-                    EC.element_to_be_clickable(locator)
+                button = WebDriverWait(self.driver, 15).until(
+                    EC.element_to_be_clickable(export_button_locator)
                 )
-                self.driver.execute_script("arguments[0].click();", element)
-                print(f"✅ 成功点击{element_name}")
+                self._smart_click(button)
+                print("🎯 Successfully clicked '导出数据' button")
                 return True
             except TimeoutException:
-                print(f"⏳ 第{attempt+1}次尝试: 等待{element_name}超时")
-            except ElementClickInterceptedException:
-                print(f"🛡️ 第{attempt+1}次尝试: 元素被遮挡")
+                print(f"⏳ Attempt {attempt + 1}: '导出数据' button not clickable yet")
+                self.close_all_popups()
                 self._scroll_away()
-        print(f"❌ 无法点击{element_name}")
+            except ElementClickInterceptedException:
+                print(f"🛡️ Attempt {attempt + 1}: Button is obstructed")
+                self.close_all_popups()
+                self._scroll_away()
+        
+        print("❌ Failed to click '导出数据' button after multiple attempts")
         return False
 
     def _smart_click(self, element):
-        """智能点击策略"""
+        """Intelligent click strategy to handle various scenarios"""
         try:
             element.click()
-        except:
-            self.driver.execute_script(
-                "arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", element
-            )
+        except Exception:
+            self.driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", element)
             self.driver.execute_script("arguments[0].click();", element)
 
     def _scroll_away(self):
-        """安全滚动操作"""
+        """Safe scrolling to remove obstructions"""
         self.driver.execute_script("window.scrollBy(0, 100);")
         time.sleep(0.3)
         self.driver.execute_script("window.scrollBy(0, -50);")
 
     def wait_for_element_visible(self, locator, timeout=20):
-        """等待元素可见（增强版）"""
+        """Wait for an element to be visible"""
         try:
             return WebDriverWait(self.driver, timeout).until(
                 EC.visibility_of_element_located(locator)
             )
         except TimeoutException:
-            print(f"⏳ 元素不可见: {locator}")
+            print(f"⏳ Element not visible: {locator}")
             return None
 
     def wait_for_element_clickable(self, locator, timeout=20):
-        """等待元素可点击（增强版）"""
+        """Wait for an element to be clickable"""
         try:
             return WebDriverWait(self.driver, timeout).until(
                 EC.element_to_be_clickable(locator)
             )
         except TimeoutException:
-            print(f"⏳ 元素不可点击: {locator}")
+            print(f"⏳ Element not clickable: {locator}")
             return None
 
     def run(self):
-        """主流程增强"""
+        """Main execution flow"""
         try:
             self.load_cookies()
-            time.sleep(3)
+            time.sleep(3)  # Brief pause to ensure everything stabilizes
         except Exception as e:
-            print(f"❗ 发生未知错误: {str(e)}")
+            print(f"❗ Unknown error occurred: {str(e)}")
         finally:
             self.driver.quit()
-            print("🛑 浏览器已关闭")
-
+            print("🛑 Browser closed")
 
 if __name__ == "__main__":
     douyin = Douyin("https://creator.douyin.com/creator-micro/home")
