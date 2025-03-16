@@ -328,12 +328,13 @@ class Douyin:
         """Main execution flow"""
         try:
             self.load_cookies()
-            time.sleep(15)  # Brief pause to ensure everything stabilizes
+            time.sleep(10)  # Brief pause to ensure everything stabilizes
         except Exception as e:
             print(f"❗ Unknown error occurred: {str(e)}")
         finally:
             self.driver.quit()
             print("🛑 Browser closed")
+        time.sleep(5)
 
 if __name__ == "__main__":
     douyin = Douyin("https://creator.douyin.com/creator-micro/home")
