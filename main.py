@@ -1,6 +1,6 @@
 import jdy
 import asyncio
-from data_processing.video_base import DailyDataProcessor
+from data_processing.video_analysis import DailyDataProcessor
 from spiders import douyin
 
 dy_spider = douyin.Douyin("https://creator.douyin.com/creator-micro/home")
