@@ -99,4 +99,5 @@ class DailyDataProcessor:
 if __name__ == "__main__":
     processor = DailyDataProcessor()
     daily_data = processor.get_daily_data()
-    print(daily_data.head())
+    daily_data.to_excel('daily_data.xlsx', index=False)
+    print(daily_data)

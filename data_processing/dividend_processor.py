@@ -110,6 +110,9 @@ class Dividend:
         yesterday_str = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
         video_scores['日期'] = yesterday_str
 
+        # **13️⃣ 过滤分成金额为 0 的数据**
+        video_scores = video_scores[video_scores["总分成"] > 0]
+
         return video_scores[['作品名称', '总分成', '日期']]
                   
     def get_video_people(self):
@@ -253,62 +256,11 @@ class Dividend:
         yesterday_str = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
         summary["日期"] = yesterday_str
 
-        return summary.reset_index(drop=True)
+        # **13️⃣ 过滤分成金额为 0 的数据**
+        summary = summary[summary["分成金额"] > 0]
 
-    def everyone_money111(self):
-        """
-        计算视频内容分成金额
-        
-        参数：
-        video_money : 包含[作品名称, 总分成]的DataFrame
-        video_people : 包含[正片标题, 人员类别, 人员, 是否完整内容]的DataFrame
-        
-        返回：
-        包含[作品名称, 人员类别, 人员, 分成金额]的DataFrame
-        """
-        # 数据预处理
-        video_people = self.get_video_people()
-        video_money = self.video_dividend()
-
-        # 统一关键字段名称
-        video_people = video_people.rename(columns={"正片标题": "作品名称"})
-        
-        # 数据合并
-        merged = video_people.merge(video_money, on="作品名称", how="inner")
-        
-        # 定义分成规则
-        RULES = {
-            ("是", "完整内容提供"): 0.6,
-            ("是", "发布运营"): 0.4,
-            ("否", "半成品内容提供"): 0.4,
-            ("否", "剪辑"): 0.2,
-            ("否", "发布运营"): 0.4
-        }
-        
-        # 计算每个角色的人数
-        merged["人数"] = merged.groupby(["作品名称", "人员类别"])["人员"].transform("count")
-        
-        # 计算分成比例
-        merged["分成比例"] = merged.apply(lambda row: RULES.get((row["是否完整内容"], row["人员类别"]), 0), axis=1)
-        
-        # 计算分成金额
-        merged["分成金额"] = (merged["总分成"] * merged["分成比例"] / merged["人数"]).round(2)
-        
-        # 过滤有效数据
-        result = merged.loc[(merged["分成金额"] > 0) & merged["人员"].notnull(), ["人员", "分成金额"]]
-        result.to_excel('原始分成.xlsx',index=False)
-        
-        # 按人员汇总分成金额
-        summary = result.groupby("人员", as_index=False)["分成金额"].sum()
-        
-        # 获取昨天的日期，格式为YYYY-MM-DD
-        yesterday_str = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-        
-        # 添加日期字段
-        summary["日期"] = yesterday_str
-        
         return summary.reset_index(drop=True)
-    
+       
     def upload_to_jdy(self):
         appId = "67c280b7c6387c4f4afd50ae"
         entryId = "67d7097d08e5f607c4cfd028"
@@ -322,7 +274,8 @@ if __name__ == '__main__':
     print(dividend.get_custom_count()['numbers'].sum())
     video_people = dividend.get_video_people()
     video_people.to_excel('视频管理.xlsx',index=False)
-    dividend.everyone_money() # 每人应分金额
+    people_money = dividend.everyone_money() # 每人应分金额
+    people_money.to_excel('每人分红金额.xlsx',index=False)
     data = dividend.video_dividend()
     data.to_excel('视频分红.xlsx',index=False)
-    dividend.upload_to_jdy()
+    # dividend.upload_to_jdy()
