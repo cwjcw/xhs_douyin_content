@@ -66,22 +66,24 @@ class Dividend:
         video_df = self.get_daily_video_data().copy()
         total_money = self.total_money_dy()
 
-        # 避免播放量为 0 的情况
-        video_df['播放量'] = video_df['播放量'].replace(0, 1)  # 防止除零错误
+        # 调整的权重设置
+        metric_weights = {
+            '播放量': 0.05,
+            '点赞量': 0.05,
+            '收藏量': 0.3,
+            '评论量': 0.3,
+            '分享量': 0.3
+        }
 
-        # 计算互动率
-        video_df['点赞率'] = video_df['点赞量'] / video_df['播放量']
-        video_df['收藏率'] = video_df['收藏量'] / video_df['播放量']
-        video_df['评论率'] = video_df['评论量'] / video_df['播放量']
-        video_df['分享率'] = video_df['分享量'] / video_df['播放量']
+        # 标准化各个维度并乘以权重
+        for metric, weight in metric_weights.items():
+            max_val = video_df[metric].max()
+            standardized_col = f'{metric}_标准化'
+            video_df[standardized_col] = video_df[metric].apply(lambda x: (x / max_val) * weight if max_val > 0 else 0)
 
-        # 计算总表现分，每个维度占 25%
-        video_df['总表现分'] = (
-            0.25 * video_df['点赞率'] +
-            0.25 * video_df['收藏率'] +
-            0.25 * video_df['评论率'] +
-            0.25 * video_df['分享率']
-        )
+        # 计算总表现分
+        standardized_cols = [f'{metric}_标准化' for metric in metric_weights.keys()]
+        video_df['总表现分'] = video_df[standardized_cols].sum(axis=1)
 
         # 按作品名称汇总总表现分
         video_scores = video_df.groupby('作品名称', as_index=False)['总表现分'].sum()
@@ -184,6 +186,77 @@ class Dividend:
     
     def everyone_money(self):
         """
+        计算视频内容分成金额，并确保所有总分成金额完整分配。
+
+        返回：
+        包含[人员, 分成金额, 日期]的 DataFrame
+        """
+        # 数据预处理
+        video_people = self.get_video_people()
+        video_money = self.video_dividend()
+
+        # 统一关键字段名称
+        video_people = video_people.rename(columns={"正片标题": "作品名称"})
+
+        # **1️⃣ 数据合并**
+        merged = video_people.merge(video_money, on="作品名称", how="left")
+
+        # **2️⃣ 确保 `总分成` 为空的作品不会丢失**
+        merged["总分成"] = merged["总分成"].fillna(0)
+
+        # 计算合并前后的 `总分成` 总和（用于对比）
+        total_dividend_before = video_money["总分成"].sum()
+        print(f"🔍 合并前 总分成金额: {total_dividend_before}")
+
+        # **3️⃣ 定义分成规则**
+        RULES = {
+            ("是", "完整内容提供"): 0.6,
+            ("是", "发布运营"): 0.4,
+            ("否", "半成品内容提供"): 0.4,
+            ("否", "剪辑"): 0.2,
+            ("否", "发布运营"): 0.4
+        }
+
+        # **4️⃣ 计算分成比例，并确保所有作品都有分成规则**
+        merged["分成比例"] = merged.apply(lambda row: RULES.get((row["是否完整内容"], row["人员类别"]), 0.2), axis=1)
+
+        # **5️⃣ 确保所有作品名称正确匹配**
+        missing_rules = merged[merged["分成比例"].isna()]
+        if not missing_rules.empty:
+            print("⚠️ 以下数据未匹配到分成规则（请检查 `RULES` 是否缺失）:")
+            print(missing_rules[["作品名称", "人员类别", "是否完整内容"]])
+
+        merged = merged.dropna(subset=["分成比例"])  # 确保 `分成比例` 不能为空
+
+        # **6️⃣ 计算 `人数`**
+        merged["人数"] = merged.groupby(["作品名称", "人员类别"])["人员"].transform("count")
+
+        # **7️⃣ 计算 `分成金额`**
+        merged["分成金额"] = (merged["总分成"] * merged["分成比例"] / merged["人数"]).round(2)
+
+        # **8️⃣ 过滤有效数据（不丢失 `分成金额 = 0` 的数据）**
+        result = merged.loc[(merged["人员"].notnull()), ["作品名称", "人员", "分成金额"]]
+        result.to_excel('原始分成.xlsx', index=False)
+
+        # **9️⃣ 计算分配后的总金额**
+        total_dividend_after = result["分成金额"].sum()
+        print(f"✅ 分配后 总分成金额: {total_dividend_after}")
+
+        # **10️⃣ 检查 `总金额是否匹配`**
+        if round(total_dividend_before, 2) != round(total_dividend_after, 2):
+            print(f"⚠️ 警告: 总金额有损失！缺少 {round(total_dividend_before - total_dividend_after, 2)}")
+        
+        # **11️⃣ 按 `人员` 汇总分成金额**
+        summary = result.groupby("人员", as_index=False)["分成金额"].sum()
+
+        # **12️⃣ 添加日期字段**
+        yesterday_str = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+        summary["日期"] = yesterday_str
+
+        return summary.reset_index(drop=True)
+
+    def everyone_money111(self):
+        """
         计算视频内容分成金额
         
         参数：
@@ -223,6 +296,7 @@ class Dividend:
         
         # 过滤有效数据
         result = merged.loc[(merged["分成金额"] > 0) & merged["人员"].notnull(), ["人员", "分成金额"]]
+        result.to_excel('原始分成.xlsx',index=False)
         
         # 按人员汇总分成金额
         summary = result.groupby("人员", as_index=False)["分成金额"].sum()
@@ -244,6 +318,11 @@ class Dividend:
 
 if __name__ == '__main__':
     dividend = Dividend()
+    print(dividend.total_money_dy())
+    print(dividend.get_custom_count()['numbers'].sum())
+    video_people = dividend.get_video_people()
+    video_people.to_excel('视频管理.xlsx',index=False)
+    dividend.everyone_money() # 每人应分金额
     data = dividend.video_dividend()
     data.to_excel('视频分红.xlsx',index=False)
-    # dividend.upload_to_jdy()
+    dividend.upload_to_jdy()

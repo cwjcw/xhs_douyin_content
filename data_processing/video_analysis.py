@@ -1,3 +1,7 @@
+'''
+处理下载的抖音视频质量数据，将其转换为当天的数据，并在处理后将其重命名，为下一天继续处理做准备
+'''
+
 import pandas as pd
 from datetime import datetime, timedelta
 import os
