@@ -69,6 +69,9 @@ class DailyDataProcessor:
         
         # 在daily_data第一列插入日期字段
         daily_data.insert(0, '日期', yesterday_str)
+
+        # 在daily_data第一列插入平台字段
+        daily_data.insert(0, '平台', '抖音')
         
         # 返回处理后的daily_data
         return daily_data

@@ -10,7 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException
 
 class Douyin:
-    def __init__(self, url, cookies_file="cookies_douyin_bjlp.pkl"):
+    def __init__(self, url, cookies_file="douyin_BJ_520.pkl"):
         self.url = url
         self.data_center_url = "https://creator.douyin.com/creator-micro/data-center/content"
         self.cookies_file = cookies_file

@@ -15,7 +15,8 @@ jdy = jdy.JDY()
 # 获取新增的视频质量数量，包括播放，点赞，收藏，评论，分享，收藏等
 processor = DailyDataProcessor()
 daily_data = processor.get_daily_data()
-
+print(daily_data.head)
+daily_data.to_excel(r'C:\Users\Administrator\Desktop\临时文件\daily.xlsx',index=False)
 # 上传当天的视频质量数据
 appid, entryid = "67c280b7c6387c4f4afd50ae", "67c69341ea7d25979a4d9e8b"
 # 调用并发库asyncio执行批量上传
