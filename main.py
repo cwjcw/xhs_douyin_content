@@ -8,8 +8,8 @@ from data_processing import dividend_processor as dy_bjlp
 jdy = jdy.JDY()
 
 # 创建浏览器对象，并下载data.xlsx
-# dy_spider = douyin.Douyin("https://creator.douyin.com/creator-micro/home")
-# dy_spider.run()
+dy_spider = douyin.Douyin("https://creator.douyin.com/creator-micro/home")
+dy_spider.run()
 
 #############################################################################################
 # 获取新增的视频质量数量，包括播放，点赞，收藏，评论，分享，收藏等
