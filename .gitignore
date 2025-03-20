@@ -171,3 +171,5 @@ cython_debug/
 .pypirc
 *.pkl
 project_config/
+*.xlsx
+
