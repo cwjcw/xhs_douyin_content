@@ -13,6 +13,7 @@ SET @yesterdayEnd = DATEADD(SECOND, -1, DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE())
 --SELECT @yesterdayStart AS YesterdayStart, @yesterdayEnd AS YesterdayEnd;
 
 SELECT
+    '小红书' AS '平台',
     CAST(cus.CreateTime AS DATE) AS createdate,
     COUNT(*) AS numbers
 FROM
