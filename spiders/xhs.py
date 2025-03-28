@@ -10,7 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException
 
 class Xhs:
-    def __init__(self, url, cookies_file="xhs_BJ_520.pkl"):
+    def __init__(self, url, cookies_file="xhs.pkl"):
         self.url = url
         self.data_center_url = "https://creator.xiaohongshu.com/creator/notemanage?roleType=creator"
         self.cookies_file = cookies_file
@@ -337,6 +337,6 @@ class Xhs:
         time.sleep(5)
 
 if __name__ == "__main__":
-    douyin = Xhs("https://pro.xiaohongshu.com/enterprise/note-manage/setting")
+    douyin = Xhs("https://creator.xiaohongshu.com/creator/notemanage?roleType=creator")
     douyin.run()
     
