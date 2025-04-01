@@ -1,255 +1,184 @@
-import pickle
+import os
 import time
+import glob
+import pickle
+# 忽略 openpyxl 样式警告
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
+import pandas as pd
 from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.edge.service import Service
+from selenium.webdriver.edge.options import Options
 from selenium.webdriver.common.by import By
-from webdriver_manager.microsoft import EdgeChromiumDriverManager
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.microsoft import EdgeChromiumDriverManager
+
+# 下载文件保存目录
+dy_file_path = r'E:\douyin_xhs_data\douyin'
+
+# 多个 cookie 文件名，放在和 .py 脚本同一目录
+cookie_list = [
+    "douyin_44698605892.pkl",
+    "douyin_bojuegz.pkl",
+    "douyin_bojuexiamen.pkl",
+    "douyin_NCHQYX520.pkl",
+    "douyin_53693141223.pkl",
+    "douyin_BJ_520.pkl"
+]
 
 class Douyin:
-    def __init__(self, url, cookies_file="douyin_BJ_520.pkl"):
+    def __init__(self, url, cookies_file):
         self.url = url
-        self.data_center_url = "https://creator.douyin.com/creator-micro/data-center/content"
         self.cookies_file = cookies_file
-        self.driver = webdriver.Edge(service=Service(EdgeChromiumDriverManager().install()))
+        self.data_center_url = "https://creator.douyin.com/creator-micro/data-center/content"
+
+        # 配置Edge下载目录
+        edge_options = Options()
+        edge_options.add_experimental_option("prefs", {
+            "download.default_directory": dy_file_path,  # 设置下载目录
+            "download.prompt_for_download": False,       # 不提示保存对话框
+            "download.directory_upgrade": True,
+            "safebrowsing.enabled": True
+        })
+
+        self.driver = webdriver.Edge(
+            service=Service(EdgeChromiumDriverManager().install()),
+            options=edge_options
+        )
         self.driver.maximize_window()
 
     def load_cookies(self):
-        """加载Cookies实现自动登录"""
         try:
             with open(self.cookies_file, "rb") as cookie_file:
                 cookies = pickle.load(cookie_file)
                 self.driver.get(self.url)
-                time.sleep(2)  # 等待基础页面加载
                 self.driver.delete_all_cookies()
                 for cookie in cookies:
                     if 'expiry' in cookie:
-                        del cookie['expiry']  # 移除过期时间避免类型错误
+                        cookie['expiry'] = int(cookie['expiry'])
                     self.driver.add_cookie(cookie)
                 self.driver.refresh()
-                print("✅ Cookies加载成功，自动登录完成！")
+                print(f"✅ Loaded cookies from {self.cookies_file}")
                 self._post_login_flow()
-        except (FileNotFoundError, EOFError):
-            self._manual_login()
+        except FileNotFoundError:
+            print(f"❌ Cookie file not found: {self.cookies_file}")
 
     def _post_login_flow(self):
-        """登录后操作流程"""
-        self.go_to_data_center()
-        self.close_all_popups()
+        self.driver.get(self.data_center_url)
+        self.wait_for_page_ready()
         self.click_tgzp_tab()
         self.click_post_list_tab()
-        self.input_dates()
+        self.input_start_date()
+        self.input_end_date()
         self.click_export_data_button()
 
-    def _manual_login(self):
-        """人工登录处理"""
-        print("❌ 未找到Cookie文件，请手动登录...")
-        self.driver.get(self.url)
-        input("请完成登录操作，按Enter继续...")
-        self._save_cookies()
-        self._post_login_flow()
-
-    def _save_cookies(self):
-        """保存有效Cookies"""
-        with open(self.cookies_file, "wb") as cookie_file:
-            # 过滤掉敏感Cookie
-            cookies = [c for c in self.driver.get_cookies() 
-                      if c['name'] not in ['passport_csrf_token', 'sessionid']]
-            pickle.dump(cookies, cookie_file)
-        print("✅ 登录状态已保存")
-
-    def go_to_data_center(self):
-        """导航到数据中心"""
-        print("🚀 正在进入数据中心...")
-        self.driver.get(self.data_center_url)
-        self.wait_for_page_ready(timeout=45)  # 数据页面加载较慢
-
     def wait_for_page_ready(self, timeout=30):
-        """增强版页面加载检测"""
-        try:
-            WebDriverWait(self.driver, timeout).until(
-                lambda d: d.execute_script("return document.readyState") == 'complete'
-                and d.find_element(By.CSS_SELECTOR, '#semiTab1').is_displayed()
-            )
-            print("📄 页面加载完成")
-        except TimeoutException:
-            print("⚠️ 页面加载超时，但继续执行")
-
-    def close_all_popups(self):
-        """关闭所有类型弹窗"""
-        print("🛡️ 启动弹窗防御机制...")
-        self._close_pagination_popup()
-        self._close_knowledge_popup()
-        self._close_floating_ads()
-        self._close_final_modal()
-
-    # 弹窗关闭方法保持不变...
+        WebDriverWait(self.driver, timeout).until(
+            lambda d: d.execute_script("return document.readyState") == 'complete'
+        )
 
     def click_tgzp_tab(self):
-        """点击「投稿作品」标签"""
+        locator = (By.XPATH, "//div[@id='semiTab1' and text()='投稿作品']")
         try:
-            tab = WebDriverWait(self.driver, 15).until(
-                EC.element_to_be_clickable((By.ID, 'semiTab1'))
+            element = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable(locator)
             )
-            self.driver.execute_script("arguments[0].click();", tab)
-            print("✅ 成功切换至投稿作品")
-            time.sleep(1.5)
+            self.driver.execute_script("arguments[0].click();", element)
+            print("✅ 点击“投稿作品”成功")
         except Exception as e:
-            self._take_debug_screenshot("tab_error")
-            raise RuntimeError(f"无法点击投稿作品标签: {str(e)}")
+            print(f"❌ 点击“投稿作品”失败: {e}")
 
     def click_post_list_tab(self):
-        """点击「投稿列表」标签"""
+        locator = (By.XPATH, "//div[@id='semiTabPanel1']//span[contains(@class, 'douyin-creator-pc-radio-addon') and normalize-space(text())='投稿列表']")
         try:
-            locator = (By.XPATH, "//span[contains(text(),'投稿列表')]/ancestor::div[@role='tab']")
-            tab = WebDriverWait(self.driver, 20).until(
+            element = WebDriverWait(self.driver, 10).until(
                 EC.element_to_be_clickable(locator)
             )
-            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", tab)
-            tab.click()
-            print("✅ 成功进入投稿列表")
-            time.sleep(2)
+            self.driver.execute_script("arguments[0].click();", element)
+            print("✅ 点击“投稿列表”成功")
         except Exception as e:
-            self._take_debug_screenshot("post_list_error")
-            raise RuntimeError(f"无法进入投稿列表: {str(e)}")
+            print(f"❌ 点击“投稿列表”失败: {e}")
 
-    def input_dates(self):
-        """
-        智能日期选择方案
-        策略：优先使用JS直填，失败后启用传统点击方式
-        """
-        today = datetime.now()
-        start_date = today - timedelta(days=89)  # 平台限制90天（含当天）
-        end_date = today - timedelta(days=1)
+    def input_start_date(self):
+        locator = (By.XPATH, "//div[@id='semiTabPanel1']//input[@placeholder='开始日期']")
+        ninety_days_ago = datetime.now() - timedelta(days=90)
+        min_date = datetime(2025, 3, 4)
+        target_date = max(ninety_days_ago, min_date).strftime("%Y-%m-%d")
+        self._fill_date(locator, target_date, "开始日期")
 
-        # 格式转换
-        start_str = start_date.strftime("%Y-%m-%d")
-        end_str = end_date.strftime("%Y-%m-%d")
+    def input_end_date(self):
+        locator = (By.XPATH, "//div[@id='semiTabPanel1']//input[@placeholder='结束日期']")
+        target_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+        self._fill_date(locator, target_date, "结束日期")
 
-        print(f"📅 尝试设置日期范围：{start_str} 至 {end_str}")
-
+    def _fill_date(self, locator, date_str, label):
         try:
-            # 方案一：使用JavaScript直接输入
-            self.driver.execute_script(f"""
-                document.querySelector("input[placeholder='开始日期']").value = '{start_str}';
-                document.querySelector("input[placeholder='结束日期']").value = '{end_str}';
-            """)
-            print("✅ 通过JS直填日期成功")
-            time.sleep(1)
-            
-            # 触发日期变更事件
-            ActionChains(self.driver).send_keys(Keys.TAB).perform()
-            time.sleep(1.5)
-            
-            # 验证日期是否生效
-            start_value = self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='开始日期']").get_attribute('value')
-            if start_value != start_str:
-                raise ValueError("日期设置未生效")
-                
-        except Exception as js_error:
-            print(f"⚠️ JS直填失败，启用备用方案: {str(js_error)}")
-            self._fallback_date_selection(start_str, end_str)
-
-    def _fallback_date_selection(self, start_date, end_date):
-        """传统日期选择方案"""
-        print("🔄 正在使用传统日期选择方式...")
-        try:
-            # 处理开始日期
-            start_input = self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='开始日期']")
-            start_input.click()
-            time.sleep(1)
-            
-            # 定位开始日期元素
-            start_locator = f"//div[@aria-label='{start_date}' and contains(@class,'datepicker-day')]"
-            WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.XPATH, start_locator))
-            ).click()
-            print(f"✅ 已选择开始日期：{start_date}")
-
-            # 处理结束日期
-            end_input = self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='结束日期']")
-            end_input.click()
-            time.sleep(1)
-            
-            # 定位结束日期元素
-            end_locator = f"//div[@aria-label='{end_date}' and contains(@class,'datepicker-day')]"
-            WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.XPATH, end_locator))
-            ).click()
-            print(f"✅ 已选择结束日期：{end_date}")
-
-            # 关闭日期选择器
-            ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
-            time.sleep(1)
-
+            input_element = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located(locator)
+            )
+            self.driver.execute_script("arguments[0].removeAttribute('readonly')", input_element)
+            self.driver.execute_script("arguments[0].value = arguments[1];", input_element, date_str)
+            self.driver.execute_script("""
+                arguments[0].dispatchEvent(new Event('input', { bubbles: true }));
+                arguments[0].dispatchEvent(new Event('change', { bubbles: true }));
+            """, input_element)
+            print(f"✅ 输入{label}：{date_str}")
         except Exception as e:
-            self._take_debug_screenshot("date_selection_fail")
-            raise RuntimeError(f"传统日期选择失败: {str(e)}")
+            print(f"❌ 设置{label}失败: {e}")
 
     def click_export_data_button(self):
-        """增强版导出按钮点击"""
-        print("📤 尝试导出数据...")
+        locator = (By.XPATH, "//div[contains(@class,'container-ttkmFy')]//button[.//span[text()='导出数据']]")
         try:
-            # 使用多个特征定位导出按钮
-            locator = (By.XPATH, '''//button[contains(.,'导出数据') and 
-                        not(contains(@class,'disabled')) and 
-                        not(@disabled)]''')
-            
-            button = WebDriverWait(self.driver, 25).until(
-                EC.element_to_be_clickable(locator)
+            time.sleep(2)
+            button = WebDriverWait(self.driver, 15).until(
+                EC.presence_of_element_located(locator)
             )
-            
-            # 滚动到可视区域
             self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", button)
-            time.sleep(0.5)
-            
-            # 使用ActionChain点击更可靠
-            ActionChains(self.driver).move_to_element(button).click().perform()
-            print("✅ 导出按钮点击成功")
-            
-            # 检查是否弹出导出选项
-            WebDriverWait(self.driver, 10).until(
-                EC.visibility_of_element_located((By.XPATH, "//div[text()='导出数据范围']"))
-            )
-            print("⏳ 正在处理导出请求...")
-            
-            # 选择Excel格式
-            excel_btn = self.driver.find_element(By.XPATH, "//span[contains(text(),'Excel')]/preceding-sibling::span")
-            excel_btn.click()
-            time.sleep(1)
-            
-            # 确认导出
-            confirm_btn = self.driver.find_element(By.XPATH, "//button[.//span[text()='导出']]")
-            confirm_btn.click()
-            print("✅ 导出任务已提交，请稍后查看邮箱")
-
+            self.driver.execute_script("arguments[0].click();", button)
+            print("✅ 点击导出数据成功")
         except Exception as e:
-            self._take_debug_screenshot("export_fail")
-            raise RuntimeError(f"导出操作失败: {str(e)}")
-
-    def _take_debug_screenshot(self, name):
-        """保存调试截图"""
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{name}_{timestamp}.png"
-        self.driver.save_screenshot(filename)
-        print(f"📸 已保存调试截图：{filename}")
+            print(f"❌ 点击导出数据失败: {e}")
 
     def run(self):
-        """主执行流程"""
         try:
             self.load_cookies()
-            time.sleep(8)  # 等待数据加载
+            time.sleep(10)
         except Exception as e:
-            print(f"❗ 发生未知错误: {str(e)}")
+            print(f"运行出错：{e}")
         finally:
             self.driver.quit()
-            print("🛑 浏览器已关闭")
+
+def merge_xlsx_files(output_path):
+    all_files = glob.glob(os.path.join(output_path, "*data*.xlsx"))
+    df_list = []
+    for file in all_files:
+        try:
+            df = pd.read_excel(file)
+            df["来源文件"] = os.path.basename(file)
+            df_list.append(df)
+        except Exception as e:
+            print(f"⚠️ 无法读取 {file}: {e}")
+
+    if df_list:
+        merged_df = pd.concat(df_list, ignore_index=True)
+        final_file = os.path.join(output_path, "douyin_汇总数据.xlsx")
+        merged_df.to_excel(final_file, index=False)
+        print(f"📊 已成功导出汇总文件：{final_file}")
+    else:
+        print("❌ 没有可合并的xlsx文件")
 
 if __name__ == "__main__":
-    douyin = Douyin("https://creator.douyin.com/creator-micro/home")
-    douyin.run()
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+
+    for cookie_file in cookie_list:
+        full_cookie_path = os.path.join(script_dir, cookie_file)
+        print(f"\n🌐 当前账号: {cookie_file}")
+        douyin = Douyin("https://creator.douyin.com/creator-micro/home", full_cookie_path)
+        douyin.run()
+        print("⏳ 等待下载完成...")
+        time.sleep(15)  # 视网络情况可增大等待时间
+
+    print("\n📁 开始合并所有Excel文件...")
+    merge_xlsx_files(dy_file_path)

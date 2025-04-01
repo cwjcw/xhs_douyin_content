@@ -14,7 +14,7 @@ project_root = os.path.abspath(os.path.join(current_dir, ".."))
 if project_root not in sys.path:
     sys.path.append(project_root)
 
-from project_config.project import custom_count_sql, video_content
+from project_config.project import custom_count_sql
 from data_processing.video_analysis import DailyDataProcessor
 
 class Dividend:
@@ -52,7 +52,7 @@ class Dividend:
         计算总金额
         '''
         total_custom = self.get_custom_count()
-        total_money = total_custom['numbers'].sum()
+        total_money = total_custom['客资数'].sum()
         return total_money*50
 
     def video_dividend(self):
@@ -271,7 +271,7 @@ class Dividend:
 if __name__ == '__main__':
     dividend = Dividend()
     print(dividend.total_money_dy())
-    print(dividend.get_custom_count()['numbers'].sum())
+    print(dividend.get_custom_count()['客资数'].sum())
     video_people = dividend.get_video_people()
     video_people.to_excel('视频管理.xlsx',index=False)
     people_money = dividend.everyone_money() # 每人应分金额

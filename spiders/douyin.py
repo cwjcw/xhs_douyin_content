@@ -1,5 +1,8 @@
 import pickle
 import time
+# 忽略 openpyxl 样式警告
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
 from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.edge.service import Service

@@ -56,6 +56,7 @@ class XhsDailyDataProcessor:
             return pd.DataFrame()
 
         yesterday_df = pd.read_excel(self.yesterday_data_path)
+        print(yesterday_df)
 
         def parse_date(date_str):
             return datetime.strptime(date_str, "%Y年%m月%d日%H时%M分%S秒")
@@ -113,7 +114,3 @@ if __name__ == "__main__":
     daily_data.to_excel(os.path.join(processor.data_path, 'combined_note_list_details.xlsx'), index=False)
     print("每日数据：")
     print(daily_data)
-
-    # 保存原始合并数据（load_data的结果）为 yesterday.xlsx
-    raw_data = processor.load_data()
-    raw_data.to_excel(os.path.join(processor.data_path, 'yesterday.xlsx'), index=False)

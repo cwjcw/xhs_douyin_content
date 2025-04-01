@@ -15,7 +15,7 @@ parent_dir = os.path.abspath(os.path.join(current_dir, ".."))
 sys.path.append(parent_dir)
 
 # 现在可以导入
-from project_config.project import file_path
+from project_config.project import dy_file_path
 
 
 class Douyin:
@@ -24,7 +24,7 @@ class Douyin:
         self.url = url
         self.account_name = account_name
         self.cookies_file = cookies_file
-        self.download_folder = file_path  # 指定下载文件夹
+        self.download_folder = dy_file_path  # 指定下载文件夹
         # Edge 浏览器选项
         options = webdriver.EdgeOptions()
         prefs = {

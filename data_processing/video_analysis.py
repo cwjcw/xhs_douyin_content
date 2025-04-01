@@ -19,17 +19,17 @@ class DailyDataProcessor:
         if project_root not in sys.path:
             sys.path.append(project_root)
 
-        from project_config.project import data_path, yesterday_data_path, file_path
+        from project_config.project import dy_data_path, dy_yesterday_path, dy_file_path
 
-        self.data_path = data_path
-        self.yesterday_data_path = yesterday_data_path
-        self.file_path = file_path
+        self.dy_data_path = dy_data_path
+        self.dy_yesterday_path = dy_yesterday_path
+        self.dy_file_path = dy_file_path
         self.compare_columns = ['播放量', '点赞量', '分享量', '评论量', '收藏量']
 
     def get_daily_data(self):
         # 读取当天数据和昨天的数据
-        data_df = pd.read_excel(self.data_path)
-        yesterday_df = pd.read_excel(self.yesterday_data_path)
+        data_df = pd.read_excel(self.dy_data_path)
+        yesterday_df = pd.read_excel(self.dy_yesterday_path)
 
         # 确认发布时间字段格式为日期格式
         data_df['发布时间'] = pd.to_datetime(data_df['发布时间'])
@@ -78,25 +78,25 @@ class DailyDataProcessor:
     
     def update_yesterday_data(self):
         """
-        删除yesterday_data_path文件，并将data_path重命名为yesterday_data.xlsx
-        :param file_path: 存放yesterday_data.xlsx的目标目录
+        删除dy_yesterday_path文件，并将dy_data_path重命名为yesterday_data.xlsx
+        :param dy_file_path: 存放yesterday_data.xlsx的目标目录
         """
-        # 确保 yesterday_data_path 文件存在再删除
-        if os.path.exists(self.yesterday_data_path):
-            os.remove(self.yesterday_data_path)
-            print(f"✅ 已删除旧的昨日数据文件: {self.yesterday_data_path}")
+        # 确保 dy_yesterday_path 文件存在再删除
+        if os.path.exists(self.dy_yesterday_path):
+            os.remove(self.dy_yesterday_path)
+            print(f"✅ 已删除旧的昨日数据文件: {self.dy_yesterday_path}")
         else:
             print("⚠️ 旧的昨日数据文件不存在，无需删除。")
         
         # 目标文件路径
-        new_yesterday_path = os.path.join(self.file_path, "yesterday_data.xlsx")
+        new_yesterday_path = os.path.join(self.dy_file_path, "yesterday_data.xlsx")
         
-        # 重命名 data_path 文件
-        if os.path.exists(self.data_path):
-            os.rename(self.data_path, new_yesterday_path)
-            print(f"✅ 已将 {self.data_path} 重命名为 {new_yesterday_path}")
+        # 重命名 dy_data_path 文件
+        if os.path.exists(self.dy_data_path):
+            os.rename(self.dy_data_path, new_yesterday_path)
+            print(f"✅ 已将 {self.dy_data_path} 重命名为 {new_yesterday_path}")
         else:
-            print("❌ 无法重命名，data_path 文件不存在。")
+            print("❌ 无法重命名，dy_data_path 文件不存在。")
 
 # 示例调用
 if __name__ == "__main__":
