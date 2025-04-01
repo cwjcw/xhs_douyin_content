@@ -7,16 +7,22 @@
 ```python
 import os
 
-
-# 存放excel下载的路径,请注意可以用你自己本地的路径替换
+# 存放excel下载的路径
 file_path = r'E:\\'
-data_path = os.path.join(file_path,'data.xlsx')
-yesterday_data_path = os.path.join(file_path,'yesterday_data.xlsx')
 
-# 存放sql文件的路径，这个是我自己存放sql文件的，可以忽略
+xhs_file_path = r'E:\douyin_xhs_data\xhs'
+xhs_data_path = os.path.join(xhs_file_path,'汇总笔记列表明细表.xlsx')
+xhs_yesterday_path = r'E:\douyin_xhs_data\xhs\yesterday.xlsx'
+
+dy_file_path = r'E:\douyin_xhs_data\douyin'
+dy_data_path = os.path.join(dy_file_path,'douyin_汇总数据.xlsx')
+dy_yesterday_path = os.path.join(dy_file_path,'yesterday.xlsx')
+
+# 存放sql文件的路径
 custom_count_sql = r'G:\New Code\douyin_video\sql\douyin_customer.sql'
+xhs_custom_count_sql = r'G:\New Code\douyin_video\sql\xhs.sql'
 
-# 字段映射关系（name到label），这个也是我自己用的，可以忽略
+# 字段映射关系（name到label）,这个是我存入数据库时用的，可忽略
 video_content = {
     "_widget_1741257105163": "账号名称",
     "_widget_1741257105165": "账号ID",
@@ -34,11 +40,21 @@ video_content = {
     "_widget_1740655279752": "正片封面",
     "_widget_1740656251325": "数量"
 }
+
+xhs_cookie_files = [
+        "xhs_xxx.pkl",
+        "xhs_xxxx.pkl",        
+    ]
+
+dy_cookie_list = [
+    "douyin_05892.pkl",    
+    "douyin_5223.pkl",
+]
 ```
 # 用法
 ## 爬虫部分，在spiders文件夹中
 - 如果只是仅仅对抓取抖音和小红书后台内容有兴趣，直接运行spiders文件夹下的douyin.py和xhs.py即可。
 - 第一次需要扫码登录，登陆后回到代码界面输入回车，即可继续。
 ## 数据处理部分，在data_processing文件夹中
-- 可以先从后台下载对应的excel文件，清空标题以外的内容，命名为yesterday_data.xlsx
-- 系统会自动下载data.xlsx,并在处理完后，自动将data.xlsx命名为yesterday_data.xlsx
+- 可以先从后台下载对应的excel文件，清空标题以外的内容，命名为yesterday.xlsx
+- 系统会自动下载data.xlsx,并在处理完后，自动将data.xlsx命名为yesterday.xlsx

@@ -19,9 +19,9 @@ class XhsDailyDataProcessor:
         if project_root not in sys.path:
             sys.path.append(project_root)
 
-        from project_config.project import xhs_file_path, xhs_yesterday_path
+        from project_config.project import xhs_file_path, xhs_yesterday_path, xhs_data_path
 
-        self.data_path = xhs_file_path
+        self.data_path = xhs_data_path
         self.yesterday_data_path = xhs_yesterday_path
         self.compare_columns = ['观看量', '点赞', '分享', '评论', '收藏']
 
@@ -57,15 +57,15 @@ class XhsDailyDataProcessor:
 
         yesterday_df = pd.read_excel(self.yesterday_data_path)
 
-        def parse_date(date_str):
-            return datetime.strptime(date_str, "%Y年%m月%d日%H时%M分%S秒")
+        # def parse_date(date_str):
+        #     return datetime.strptime(date_str, "%Y年%m月%d日%H时%M分%S秒")
 
-        data_df['首次发布时间'] = data_df['首次发布时间'].astype(str).apply(parse_date)
-        # yesterday_df['首次发布时间'] = yesterday_df['首次发布时间'].astype(str).apply(parse_date)
+        # data_df['首次发布时间'] = data_df['首次发布时间'].astype(str).apply(parse_date)
+        # # yesterday_df['首次发布时间'] = yesterday_df['首次发布时间'].astype(str).apply(parse_date)
 
-        min_date = datetime(2025, 3, 14)
-        data_df = data_df[data_df['首次发布时间'] >= min_date].copy()
-        yesterday_df = yesterday_df[yesterday_df['首次发布时间'] >= min_date].copy()
+        # min_date = datetime(2025, 3, 14)
+        # data_df = data_df[data_df['首次发布时间'] >= min_date].copy()
+        # yesterday_df = yesterday_df[yesterday_df['首次发布时间'] >= min_date].copy()
 
         # 以笔记标题为关键字进行合并，并进行数据字段相减：今日 - 昨日
         daily_data = pd.merge(

@@ -1,4 +1,4 @@
-import os
+import os, sys
 import pickle
 import time
 import glob
@@ -12,10 +12,21 @@ from webdriver_manager.microsoft import EdgeChromiumDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
+# 获取当前脚本所在目录 (data_processing目录)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# 获取项目根目录（即当前目录的上一级）
+project_root = os.path.abspath(os.path.join(current_dir, ".."))
+
+# 将项目根目录添加到sys.path中
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
+from project_config.project import xhs_cookie_list, xhs_file_path
 
 
 class Xhs:
-    def __init__(self, url, cookies_file="xh.pkl", download_path=r"E:\douyin_xhs_data\xhs"):
+    def __init__(self, url, cookies_file="xhs.pkl", download_path=xhs_file_path):
         self.url = url
         self.cookies_file = cookies_file
         self.data_center_url = "https://creator.xiaohongshu.com/creator/notemanage?roleType=creator"
@@ -205,25 +216,11 @@ class Xhs:
 # ==========================
 
 if __name__ == "__main__":
-    cookie_files = [
-        # "xhs_336283533.pkl",
-        # "xhs_345630498.pkl",
-        # "xhs_348492471.pkl",
-        # "xhs_348499654.pkl",
-        # "xhs_485899710.pkl",
-        # "xhs_672578639.pkl",
-        # "xhs_713752297I.pkl",
-        # "xhs_1159005953.pkl",
-        "xhs_2690270173.pkl",
-        "xhs_4235229252.pkl",
-        "xhs_26501332556.pkl",
-        "xhs_yayun92.pkl"
-    ]
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     download_path = r"E:\douyin_xhs_data\xhs"
 
-    for cookie_file in cookie_files:
+    for cookie_file in xhs_cookie_list:
         print(f"\n================ 处理：{cookie_file} ================\n")
         full_path = os.path.join(base_dir, cookie_file)
         douyin = Xhs(
