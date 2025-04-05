@@ -1,5 +1,6 @@
 import read_sql as rs
 import os
+import re
 import sys
 import jdy
 import pandas as pd
@@ -15,7 +16,7 @@ if project_root not in sys.path:
     sys.path.append(project_root)
 
 from project_config.project import custom_count_sql
-from data_processing.video_analysis import DailyDataProcessor
+from data_processing.dy_video_analysis import DailyDataProcessor
 
 class Dividend:
     def __init__(self):
@@ -122,69 +123,65 @@ class Dividend:
         正片标题 | 账号名称 | 账号ID | 是否完整内容 | 完整内容提供 
         半成品内容提供 | 剪辑 | 发布运营 | 提交日期 | 来源门店/部门
         """
+        import re
+
         appId = "67c280b7c6387c4f4afd50ae"
         entryId = "67c2816ffa795e84a8fe45b9"
         video_people = self.jdy.get_jdy_data(app_id=appId, entry_id=entryId)
-        
+
         rows = []
         for doc in video_people:
-            # 基础字段处理
+            # 原始标题
+            title_raw = doc.get("_widget_1740646149825", "")
+            # 处理标题：去掉 # 及后续内容（包括前面的空格）
+            title_cleaned = re.sub(r'\s*#.*', '', title_raw)
+
             base_fields = {
                 "账号名称": doc.get("_widget_1741257105163", ""),
                 "账号ID": doc.get("_widget_1741257105165", ""),
                 "是否完整内容": doc.get("_widget_1740798082550", ""),
-                "正片标题": doc.get("_widget_1740646149825", ""),
+                "正片标题": title_cleaned,
                 "提交日期": doc.get("_widget_1740646149826", ""),
                 "来源门店/部门": doc.get("_widget_1741934971937", {}).get("name", "")
             }
-            
-            # 用户组字段处理（带长度对齐）
+
             user_groups = {
                 "完整内容提供": [u.get("username") for u in doc.get("_widget_1740798082567", [])],
                 "半成品内容提供": [u.get("username") for u in doc.get("_widget_1740798082568", [])],
                 "剪辑": [u.get("username") for u in doc.get("_widget_1740798082569", [])],
                 "发布运营": [u.get("username") for u in doc.get("_widget_1740798082570", [])]
             }
-            
-            # 计算最大用户组长度
+
             max_len = max(len(g) for g in user_groups.values()) or 1
-            
-            # 填充所有用户组到相同长度
             aligned_groups = {}
             for field, users in user_groups.items():
-                aligned_groups[field] = users + [None]*(max_len - len(users))  # 用None填充
-                
-            # 合并字段
+                aligned_groups[field] = users + [None]*(max_len - len(users))
+
             row = {**base_fields, **aligned_groups}
             rows.append(row)
-        
-        # 生成DataFrame并展开
+
         df = pd.DataFrame(rows)
-        
-        # 分步展开每组字段（解决长度不一致问题）
+
         exploded_dfs = []
         for group in ["完整内容提供", "半成品内容提供", "剪辑", "发布运营"]:
             temp_df = df[["正片标题"] + [group]].explode(group)
             temp_df = temp_df.rename(columns={group: "人员", "_id": "人员类别"})
-            temp_df["人员类别"] = group  # 添加类别标识
+            temp_df["人员类别"] = group
             exploded_dfs.append(temp_df)
-        
-        # 合并所有展开结果
+
         final_df = pd.concat(exploded_dfs, ignore_index=True)
-        
-        # 合并基础字段
+
         base_df = df[["正片标题", "账号名称", "账号ID", "是否完整内容", "提交日期", "来源门店/部门"]]
         final_df = final_df.merge(base_df, on="正片标题", how="left")
-        
-        # 清理空值
+
         final_df = final_df.dropna(subset=["人员"])
-        
-        # 字段排序
+
         column_order = [
             "正片标题", "账号名称", "账号ID", "是否完整内容", 
             "人员类别", "人员", "提交日期", "来源门店/部门"
         ]
         return final_df[column_order].reset_index(drop=True)
+
 
     
     def everyone_money(self):

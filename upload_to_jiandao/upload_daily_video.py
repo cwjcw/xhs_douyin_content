@@ -14,7 +14,7 @@ project_root = os.path.abspath(os.path.join(current_dir, ".."))
 if project_root not in sys.path:
     sys.path.append(project_root)
 
-from data_processing.video_analysis import DailyDataProcessor
+from data_processing.dy_video_analysis import DailyDataProcessor
 
 processor = DailyDataProcessor()
 daily_data = processor.get_daily_data()

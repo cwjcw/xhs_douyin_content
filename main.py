@@ -1,8 +1,8 @@
 import jdy
 import asyncio
-from data_processing.video_analysis import DailyDataProcessor
+from data_processing.dy_video_analysis import DailyDataProcessor
 from spiders import douyin
-from data_processing import dividend_processor as dy_bjlp
+from data_processing import dy_money as dy_bjlp
 
 # 创建简道云对象
 jdy = jdy.JDY()

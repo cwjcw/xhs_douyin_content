@@ -4,7 +4,7 @@ DECLARE @yesterdayStart DATETIME;
 DECLARE @yesterdayEnd DATETIME;
 
 -- 计算昨天的起始时间和结束时间
-SET @yesterdayStart = '2025-03-29 0:0:0'; -- 昨天的 00:00:00
+SET @yesterdayStart = '2025-04-01 0:0:0'; -- 昨天的 00:00:00
 --SET @yesterdayStart = DATEADD(day, -1, CAST(GETDATE() AS DATE)); -- 昨天的 00:00:00
 --SET @yesterdayEnd = '2025-03-25 0:0:0'; -- 昨天的 00:00:00
 SET @yesterdayEnd = DATEADD(SECOND, -1, DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0));   -- 昨天的 23:59:59
@@ -13,8 +13,8 @@ SET @yesterdayEnd = DATEADD(SECOND, -1, DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE())
 --SELECT @yesterdayStart AS YesterdayStart, @yesterdayEnd AS YesterdayEnd;
 
 SELECT
-    '抖音' AS '所属平台',
     CAST(cus.CreateTime AS DATE) AS '创建日期',
+    '抖音' AS '所属平台',    
     COUNT(*) AS '客资数'
 FROM
     bjCustomM cus
