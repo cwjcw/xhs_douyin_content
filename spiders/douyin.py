@@ -25,7 +25,7 @@ project_root = os.path.abspath(os.path.join(current_dir, ".."))
 if project_root not in sys.path:
     sys.path.append(project_root)
 
-from project_config.project import dy_cookie_list, dy_file_path
+from project_config.project import dy_cookie_list, dy_file_path, driver_path
 
 class Douyin:
     def __init__(self, url, cookies_file):
@@ -42,10 +42,16 @@ class Douyin:
             "safebrowsing.enabled": True
         })
 
-        self.driver = webdriver.Edge(
-            service=Service(EdgeChromiumDriverManager().install()),
-            options=edge_options
-        )
+        # 当 cookies_file 为空时可以选择不初始化 driver（仅用于数据合并）
+        if self.cookies_file:
+            print(f"使用本地 EdgeDriver 路径: {driver_path}")
+            self.driver = webdriver.Edge(
+                service=Service(driver_path),
+                options=edge_options
+            )
+            self.driver.maximize_window()
+        else:
+            self.driver = None
         self.driver.maximize_window()
 
     def load_cookies(self):
