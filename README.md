@@ -9,18 +9,15 @@ import os
 
 # 存放excel下载的路径
 file_path = r'E:\\'
+driver_path = r'G:\New Code\douyin_video\project_config\msedgedriver.exe'
 
 xhs_file_path = r'E:\douyin_xhs_data\xhs'
 xhs_data_path = os.path.join(xhs_file_path,'汇总笔记列表明细表.xlsx')
-xhs_yesterday_path = r'E:\douyin_xhs_data\xhs\yesterday.xlsx'
+xhs_yesterday_path = os.path.join(xhs_file_path,'yesterday.xlsx')
 
 dy_file_path = r'E:\douyin_xhs_data\douyin'
 dy_data_path = os.path.join(dy_file_path,'douyin_汇总数据.xlsx')
 dy_yesterday_path = os.path.join(dy_file_path,'yesterday.xlsx')
-
-# 存放sql文件的路径
-custom_count_sql = r'G:\New Code\douyin_video\sql\douyin_customer.sql'
-xhs_custom_count_sql = r'G:\New Code\douyin_video\sql\xhs.sql'
 
 # 请把生成的pkl文件放到spiders文件夹中，并将其文件名放到以下列表中
 xhs_cookie_files = [
