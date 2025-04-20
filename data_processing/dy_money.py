@@ -281,4 +281,4 @@ if __name__ == '__main__':
     people_money.to_excel('每人分红金额.xlsx', index=False)
     data = dividend.video_dividend()
     data.to_excel('视频分红.xlsx', index=False)
-    # dividend.upload_to_jdy()
+    dividend.upload_to_jdy()
