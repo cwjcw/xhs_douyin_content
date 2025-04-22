@@ -16,7 +16,7 @@ if project_root not in sys.path:
 from project_config.project import xhs_custom_count_sql
 from data_processing.xhs_video_analysis import DailyDataProcessor
 
-class Dividend:
+class XhsDividend:
     """
     视频内容分红管理类：用于读取视频数据、客资数据和简道云信息，
     进行内容表现分析、分红计算并可上传结果至简道云。
@@ -222,7 +222,7 @@ class Dividend:
         asyncio.run(self.jdy.batch_create(app_id=appId, entry_id=entryId, source_data=final_data))
 
 if __name__ == '__main__':
-    dividend = Dividend()
+    dividend = XhsDividend()
     print(dividend.total_money_dy())
     print(dividend.get_custom_count()['客资数'].sum())
     video_people = dividend.get_video_people()
