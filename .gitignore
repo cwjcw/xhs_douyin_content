@@ -168,9 +168,4 @@ cython_debug/
 #.idea/
 
 # PyPI configuration file
-.pypirc
-*.pkl
-project_config/
-*.xlsx
-pkl/
-*.sql
+
