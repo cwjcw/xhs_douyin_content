@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import os
 import sys
 
-class DailyDataProcessor:
+class XhsDailyDataProcessor:
     def __init__(self):
         # 获取当前脚本所在目录 (data_processing目录)
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -126,7 +126,7 @@ class DailyDataProcessor:
 
 # 示例调用
 if __name__ == "__main__":
-    processor = DailyDataProcessor()
+    processor = XhsDailyDataProcessor()
     # processor.update_yesterday_data()
     formatted_df = processor.convert_to_video_quality_format()
     formatted_df.to_excel('小红书视频质量数据daily.xlsx', index=False)

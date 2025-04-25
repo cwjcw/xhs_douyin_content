@@ -14,7 +14,7 @@ if project_root not in sys.path:
     sys.path.append(project_root)
 
 from project_config.project import xhs_custom_count_sql
-from data_processing.xhs_video_analysis import DailyDataProcessor
+from data_processing.xhs_video_analysis import XhsDailyDataProcessor
 
 class XhsDividend:
     """
@@ -26,7 +26,7 @@ class XhsDividend:
         self.sql = rs.MSSQLDatabase()
         self.custom_count_path = xhs_custom_count_sql
         self.jdy = jdy.JDY()
-        self.daily_process = DailyDataProcessor()
+        self.daily_process = XhsDailyDataProcessor()
         self.metrics = ['观看量', '点赞', '收藏', '评论', '分享']
         self._cached_jdy_data = None
 

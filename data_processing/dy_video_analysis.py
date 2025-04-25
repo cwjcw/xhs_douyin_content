@@ -6,6 +6,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import os
 import sys
+import glob
 
 class DailyDataProcessor:
     def __init__(self):
@@ -78,25 +79,37 @@ class DailyDataProcessor:
     
     def update_yesterday_data(self):
         """
-        删除dy_yesterday_path文件，并将dy_data_path重命名为yesterday_data.xlsx
-        :param dy_file_path: 存放yesterday_data.xlsx的目标目录
+        删除 dy_yesterday_path 文件；
+        将 dy_data_path 重命名为 yesterday.xlsx；
+        删除 dy_file_path 文件夹中所有包含 "data" 的 .xlsx 文件。
         """
-        # 确保 dy_yesterday_path 文件存在再删除
+        # ✅ 删除旧的昨日数据文件
         if os.path.exists(self.dy_yesterday_path):
             os.remove(self.dy_yesterday_path)
             print(f"✅ 已删除旧的昨日数据文件: {self.dy_yesterday_path}")
         else:
             print("⚠️ 旧的昨日数据文件不存在，无需删除。")
+
+        # ✅ 删除所有包含"data"的 .xlsx 文件
+        pattern = os.path.join(self.dy_file_path, '*data*.xlsx')
+        data_files = glob.glob(pattern)
         
-        # 目标文件路径
-        new_yesterday_path = os.path.join(self.dy_file_path, "yesterday_data.xlsx")
+        for file_path in data_files:
+            try:
+                os.remove(file_path)
+                print(f"🗑️ 已删除包含'data'的文件: {file_path}")
+            except Exception as e:
+                print(f"❌ 删除文件失败 {file_path}，原因: {e}")
+
+        # ✅ 重命名 dy_data_path 文件为 yesterday.xlsx
+        new_yesterday_path = os.path.join(self.dy_file_path, "yesterday.xlsx")
         
-        # 重命名 dy_data_path 文件
         if os.path.exists(self.dy_data_path):
             os.rename(self.dy_data_path, new_yesterday_path)
             print(f"✅ 已将 {self.dy_data_path} 重命名为 {new_yesterday_path}")
         else:
             print("❌ 无法重命名，dy_data_path 文件不存在。")
+
 
 # 示例调用
 if __name__ == "__main__":
