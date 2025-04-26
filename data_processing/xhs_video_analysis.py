@@ -100,11 +100,7 @@ class XhsDailyDataProcessor:
 
         # —— 3. 上传到简道云 —— #
         appid, entryid = "67c280b7c6387c4f4afd50ae", "67c69341ea7d25979a4d9e8b"
-        # Windows 下设置事件循环策略
-        try:
-            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-        except AttributeError:
-            pass
+        
         asyncio.run(jdy.batch_create(app_id=appid, entry_id=entryid, source_data=converted_df))
 
         # —— 4. 返回 daily_data —— #

@@ -21,7 +21,7 @@ jdy = jdy.JDY()
 project_root = os.path.dirname(os.path.abspath(__file__))
 
 # 指向 spiders 目录
-spiders_dir = os.path.join(project_root, 'spiders')
+spiders_dir = os.path.join(project_root, 'pkl')
 
 # 自动获取所有包含 'dy' 且以 .pkl 结尾的文件
 cookie_list = [f for f in os.listdir(spiders_dir) if 'douyin' in f and f.endswith('.pkl')]

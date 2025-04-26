@@ -1,21 +1,30 @@
 import os
 
-# 存放excel下载的路径
-file_path = r'E:\\'
-driver_path = r'G:\New Code\douyin_video\project_config\msedgedriver.exe'
+import os
 
-xhs_file_path = r'E:\douyin_xhs_data\xhs'
+# 当前文件在 project_config 目录下，退回到项目根目录
+base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+
+# edge文件路径
+driver_path = os.path.join(base_dir, 'project_config', 'msedgedriver')
+
+# 小红薯文件
+xhs_file_path = os.path.join(base_dir, 'xlsx_file', 'xhs')
 xhs_data_path = os.path.join(xhs_file_path,'汇总笔记列表明细表.xlsx')
-xhs_yesterday_path = r'E:\douyin_xhs_data\xhs\yesterday.xlsx'
+xhs_yesterday_path = os.path.join(xhs_file_path,'yesterday.xlsx')
 
-dy_file_path = r'E:\douyin_xhs_data\douyin'
+# 抖音文件
+dy_file_path = os.path.join(base_dir, 'xlsx_file', 'douyin')
 dy_data_path = os.path.join(dy_file_path,'douyin_汇总数据.xlsx')
 dy_yesterday_path = os.path.join(dy_file_path,'yesterday.xlsx')
 
 # 存放sql文件的路径
-custom_count_sql = r'G:\New Code\douyin_video\sql\douyin_customer.sql'
-xhs_custom_count_sql = r'G:\New Code\douyin_video\sql\xhs.sql'
+sql_path = os.path.join(base_dir,'sql')
+custom_count_sql = os.path.join(sql_path,'douyin_customer.sql')
+xhs_custom_count_sql = os.path.join(sql_path,'xhs.sql')
 
+# 存放pkl文件的路径
+pkl_path = os.path.join(base_dir,'pkl')
 # 字段映射关系（name到label）
 fields = [
         {"label": "所属平台", "type": "combo"},

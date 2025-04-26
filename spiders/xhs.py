@@ -20,7 +20,7 @@ project_root = os.path.abspath(os.path.join(current_dir, ".."))
 # 将项目根目录添加到sys.path中
 if project_root not in sys.path:
     sys.path.append(project_root)
-from project_config.project import xhs_cookie_list, xhs_file_path, driver_path
+from project_config.project import xhs_cookie_list, xhs_file_path, driver_path, pkl_path
 
 
 class Xhs:
@@ -284,10 +284,10 @@ class Xhs:
         2. 最后调用 merge_and_cleanup_xlsx_files() 合并所有下载的 Excel 文件，
            返回合并后的 DataFrame。
         """
-        base_dir = os.path.dirname(os.path.abspath(__file__))
+        # base_dir = os.path.dirname(os.path.abspath(__file__))
         for cookie_file in cookie_list:
             print(f"\n================ 处理：{cookie_file} ================\n")
-            full_path = os.path.join(base_dir, cookie_file)
+            full_path = os.path.join(pkl_path, cookie_file)
             account = cls(url="https://creator.xiaohongshu.com/statistics/data-analysis", cookies_file=full_path)
             account.run()
         # 调用一个临时实例来执行合并方法（下载目录为统一配置）

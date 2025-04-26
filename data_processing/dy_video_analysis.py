@@ -83,8 +83,6 @@ class DailyDataProcessor:
         # 上传视频质量内容        
         appid, entryid = "67c280b7c6387c4f4afd50ae", "67c69341ea7d25979a4d9e8b"
 
-        # 设置事件循环策略（在windows环境下必须添加）
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
         # # 调用并发库asyncio执行批量上传
         asyncio.run(jdy.batch_create(app_id=appid, entry_id=entryid, source_data=daily_data))
@@ -129,7 +127,8 @@ class DailyDataProcessor:
 # 示例调用
 if __name__ == "__main__":
     processor = DailyDataProcessor()
-    daily_data = processor.get_daily_data()
-    daily_data.to_excel('daily_data.xlsx', index=False)
-    print(daily_data)
+    # daily_data = processor.get_daily_data()
+    # daily_data.to_excel('daily_data.xlsx', index=False)
+    # print(daily_data)
+    
 

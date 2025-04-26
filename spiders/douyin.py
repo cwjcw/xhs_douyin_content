@@ -1,7 +1,6 @@
-import os, sys
-import time
-import glob
+import glob, time, os, sys
 import pickle
+import traceback
 # 忽略 openpyxl 样式警告
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
@@ -20,10 +19,7 @@ project_root = os.path.abspath(os.path.join(current_dir, ".."))
 # 将项目根目录添加到sys.path中
 if project_root not in sys.path:
     sys.path.append(project_root)
-from project_config.project import driver_path
-
-# 下载文件保存目录
-dy_file_path = r'E:\douyin_xhs_data\douyin'
+from project_config.project import driver_path, dy_file_path
 
 # 多个 cookie 文件名，放在和 .py 脚本同一目录
 cookie_list = [
@@ -57,6 +53,12 @@ class Douyin:
         )
         self.driver.maximize_window()
 
+        # 强制设置下载路径
+        # self.driver.execute_cdp_cmd("Page.setDownloadBehavior", {
+        #     "behavior": "allow",
+        #     "downloadPath": dy_file_path
+        # })
+
     def load_cookies(self):
         try:
             with open(self.cookies_file, "rb") as cookie_file:
@@ -78,8 +80,8 @@ class Douyin:
         self.wait_for_page_ready()
         self.click_tgzp_tab()
         self.click_post_list_tab()
-        self.input_start_date()
-        self.input_end_date()
+        # self.input_start_date()
+        # self.input_end_date()
         self.click_export_data_button()
 
     def wait_for_page_ready(self, timeout=30):
@@ -149,12 +151,16 @@ class Douyin:
         except Exception as e:
             print(f"❌ 点击导出数据失败: {e}")
 
+
     def run(self):
         try:
+            print("🔄 开始加载 cookies 并登录…")
             self.load_cookies()
             time.sleep(10)
-        except Exception as e:
-            print(f"运行出错：{e}")
+            print("✅ run() 执行完毕，无异常。")
+        except Exception:
+            print("❌ 运行出错，完整异常信息：")
+            traceback.print_exc()
         finally:
             self.driver.quit()
 
