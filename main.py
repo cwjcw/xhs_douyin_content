@@ -46,16 +46,26 @@ else:
 # 获取抖音新增的视频质量数量，包括播放，点赞，收藏，评论，分享，收藏等
 
 dividend = Dividend()
-print(dividend.total_money_dy())
-print(dividend.get_custom_count()['客资数'].sum())
+# print(dividend.total_money_dy())
+# print(dividend.get_custom_count()['客资数'].sum())
 video_people = dividend.get_video_people()
-video_people.to_excel('抖音视频管理.xlsx', index=False)
+# video_people.to_excel('抖音视频管理.xlsx', index=False)
 people_money = dividend.everyone_money()  # 每人应分金额
-people_money.to_excel('抖音每人分红金额.xlsx', index=False)
+# people_money.to_excel('抖音每人分红金额.xlsx', index=False)
 data = dividend.video_dividend()
-data.to_excel('抖音视频分红.xlsx', index=False)
+# data.to_excel('抖音视频分红.xlsx', index=False)
 dividend.upload_to_jdy()
 
+# #############################################################################################
+# 上传抖音客资
+dy_custom = dividend.get_custom_count()
+appid, entryid = "67c280b7c6387c4f4afd50ae", "67df691887cb8026eb606a95"
+# Windows 下设置事件循环策略
+try:
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+except AttributeError:
+    pass
+asyncio.run(jdy.batch_create(app_id=appid, entry_id=entryid, source_data=dy_custom))
 
 # #############################################################################################
 # 处理抖音数据，转换成yesterday数据
@@ -78,15 +88,26 @@ else:
 # 获取小红书新增的视频质量数量，包括播放，点赞，收藏，评论，分享，收藏等
 
 xhsdividend = XhsDividend()
-print(xhsdividend.total_money_dy())
-print(xhsdividend.get_custom_count()['客资数'].sum())
+# print(xhsdividend.total_money_dy())
+# print(xhsdividend.get_custom_count()['客资数'].sum())
 video_people = xhsdividend.get_video_people()
-video_people.to_excel('小红书视频管理.xlsx', index=False)
+# video_people.to_excel('小红书视频管理.xlsx', index=False)
 people_money = xhsdividend.everyone_money()
-people_money.to_excel('小红书每人分红金额.xlsx', index=False)
+# people_money.to_excel('小红书每人分红金额.xlsx', index=False)
 data = xhsdividend.video_dividend()
-data.to_excel('小红书视频分红.xlsx', index=False)
+# data.to_excel('小红书视频分红.xlsx', index=False)
 xhsdividend.upload_to_jdy()
+
+# #############################################################################################
+# 上传小红书客资
+xhs_custom = xhsdividend.get_custom_count()
+appid, entryid = "67c280b7c6387c4f4afd50ae", "67df691887cb8026eb606a95"
+# Windows 下设置事件循环策略
+try:
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+except AttributeError:
+    pass
+asyncio.run(jdy.batch_create(app_id=appid, entry_id=entryid, source_data=xhs_custom))
 
 #############################################################################################
 # 处理小红书数据，转换成yesterday数据

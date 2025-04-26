@@ -17,23 +17,27 @@ custom_count_sql = r'G:\New Code\douyin_video\sql\douyin_customer.sql'
 xhs_custom_count_sql = r'G:\New Code\douyin_video\sql\xhs.sql'
 
 # 字段映射关系（name到label）
-video_content = {
-    "_widget_1741257105163": "账号名称",
-    "_widget_1741257105165": "账号ID",
-    "_widget_1740798082550": "是否完整内容",
-    "_widget_1740798082567": "完整内容提供",
-    "_widget_1740798082568": "半成品内容提供",
-    "_widget_1740798082569": "剪辑",
-    "_widget_1740798082570": "发布运营",
-    "_widget_1740646149825": "正片标题",
-    "_widget_1740798082556": "正片链接",
-    "_widget_1740646149824": "正片ID",
-    "_widget_1740646149826": "提交日期",
-    "_widget_1741934971937": "来源门店/部门",
-    "_widget_1740655279753": "正片说明",
-    "_widget_1740655279752": "正片封面",
-    "_widget_1740656251325": "数量"
-}
+fields = [
+        {"label": "所属平台", "type": "combo"},
+        {"label": "数据日期", "type": "datetime"},
+        {"label": "作品名称", "type": "text"},
+        {"label": "发布时间", "type": "datetime"},
+        {"label": "体裁", "type": "text"},
+        {"label": "审核状态", "type": "text"},
+        {"label": "播放量", "type": "number"},
+        {"label": "完播率", "type": "number"},
+        {"label": "5s完播率", "type": "number"},
+        {"label": "封面点击率", "type": "number"},
+        {"label": "2s跳出率", "type": "number"},
+        {"label": "平均播放时长", "type": "number"},
+        {"label": "点赞量", "type": "number"},
+        {"label": "分享量", "type": "number"},
+        {"label": "评论量", "type": "number"},
+        {"label": "收藏量", "type": "number"},
+        {"label": "主页访问量", "type": "number"},
+        {"label": "粉丝增量", "type": "number"},
+    ]
+
 
 xhs_cookie_list = [
         "xhs_336283533.pkl",

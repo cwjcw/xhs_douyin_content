@@ -273,12 +273,13 @@ class Dividend:
 
 if __name__ == '__main__':
     dividend = Dividend()
-    print(dividend.total_money_dy())
-    print(dividend.get_custom_count()['客资数'].sum())
-    video_people = dividend.get_video_people()
-    video_people.to_excel('视频管理.xlsx', index=False)
-    people_money = dividend.everyone_money()  # 每人应分金额
-    people_money.to_excel('每人分红金额.xlsx', index=False)
-    data = dividend.video_dividend()
-    data.to_excel('视频分红.xlsx', index=False)
-    dividend.upload_to_jdy()
+    # print(dividend.total_money_dy())
+    # print(dividend.get_custom_count()['客资数'].sum())
+    # video_people = dividend.get_video_people()
+    # video_people.to_excel('视频管理.xlsx', index=False)
+    # people_money = dividend.everyone_money()  # 每人应分金额
+    # people_money.to_excel('每人分红金额.xlsx', index=False)
+    # data = dividend.video_dividend()
+    # data.to_excel('视频分红.xlsx', index=False)
+    # dividend.upload_to_jdy()
+    print(dividend.get_custom_count())

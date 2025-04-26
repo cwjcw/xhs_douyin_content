@@ -1,27 +1,30 @@
 '''
 处理下载的抖音视频质量数据，将其转换为当天的数据，并在处理后将其重命名，为下一天继续处理做准备
 '''
-
 import pandas as pd
 from datetime import datetime, timedelta
 import os
 import sys
 import glob
+import jdy
+import asyncio
+
+# 获取当前脚本所在目录 (data_processing目录)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# 获取项目根目录（即当前目录的上一级）
+project_root = os.path.abspath(os.path.join(current_dir, ".."))
+
+# 将项目根目录添加到sys.path中
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
+from project_config.project import dy_data_path, dy_yesterday_path, dy_file_path
+
+jdy = jdy.JDY()
 
 class DailyDataProcessor:
-    def __init__(self):
-        # 获取当前脚本所在目录 (data_processing目录)
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-
-        # 获取项目根目录（即当前目录的上一级）
-        project_root = os.path.abspath(os.path.join(current_dir, ".."))
-
-        # 将项目根目录添加到sys.path中
-        if project_root not in sys.path:
-            sys.path.append(project_root)
-
-        from project_config.project import dy_data_path, dy_yesterday_path, dy_file_path
-
+    def __init__(self):    
         self.dy_data_path = dy_data_path
         self.dy_yesterday_path = dy_yesterday_path
         self.dy_file_path = dy_file_path
@@ -73,6 +76,18 @@ class DailyDataProcessor:
 
         # 在daily_data第一列插入平台字段
         daily_data.insert(0, '平台', '抖音')
+
+        if '来源文件' in daily_data.columns:
+            daily_data.drop(columns=['来源文件'], inplace=True)
+
+        # 上传视频质量内容        
+        appid, entryid = "67c280b7c6387c4f4afd50ae", "67c69341ea7d25979a4d9e8b"
+
+        # 设置事件循环策略（在windows环境下必须添加）
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+        # # 调用并发库asyncio执行批量上传
+        asyncio.run(jdy.batch_create(app_id=appid, entry_id=entryid, source_data=daily_data))
         
         # 返回处理后的daily_data
         return daily_data
@@ -117,3 +132,4 @@ if __name__ == "__main__":
     daily_data = processor.get_daily_data()
     daily_data.to_excel('daily_data.xlsx', index=False)
     print(daily_data)
+
