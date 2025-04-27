@@ -1,5 +1,6 @@
 import glob, time, os, sys
 import pickle
+import tempfile
 import traceback
 # 忽略 openpyxl 样式警告
 import warnings
@@ -37,8 +38,18 @@ class Douyin:
         self.cookies_file = cookies_file
         self.data_center_url = "https://creator.douyin.com/creator-micro/data-center/content"
 
-        # 配置Edge下载目录
+        # 创建 Edge 配置
         edge_options = Options()
+
+        # 启用无头模式（headless），适合定时任务、服务器环境
+        edge_options.add_argument('--headless')
+        edge_options.add_argument('--disable-gpu')
+
+        # 动态创建临时 user-data-dir，避免目录冲突
+        temp_user_data_dir = tempfile.mkdtemp()
+        edge_options.add_argument(f'--user-data-dir={temp_user_data_dir}')
+
+        # 配置Edge下载目录
         edge_options.add_experimental_option("prefs", {
             "download.default_directory": dy_file_path,  # 设置下载目录
             "download.prompt_for_download": False,       # 不提示保存对话框
@@ -46,12 +57,14 @@ class Douyin:
             "safebrowsing.enabled": True
         })
 
-        # 使用自定义的 driver_path
+        # 初始化 Edge 浏览器
         self.driver = webdriver.Edge(
             service=Service(driver_path),
             options=edge_options
         )
-        self.driver.maximize_window()
+
+        # 无头模式下无需最大化窗口，注释掉以下代码
+        # self.driver.maximize_window()
 
         # 强制设置下载路径
         # self.driver.execute_cdp_cmd("Page.setDownloadBehavior", {
