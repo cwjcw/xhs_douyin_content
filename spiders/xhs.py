@@ -1,4 +1,4 @@
-import os, sys
+import os, sys,tempfile
 import pickle
 import time
 import glob
@@ -8,7 +8,7 @@ from selenium import webdriver
 from selenium.webdriver.edge.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.edge.options import Options
-from webdriver_manager.microsoft import EdgeChromiumDriverManager
+# from webdriver_manager.microsoft import EdgeChromiumDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
@@ -30,26 +30,33 @@ class Xhs:
         self.data_center_url = "https://creator.xiaohongshu.com/statistics/data-analysis"
         self.download_path = download_path
 
-        # 配置 Edge 下载路径
+        # 创建 Edge 配置
         edge_options = Options()
-        prefs = {
-            "download.default_directory": self.download_path,
-            "download.prompt_for_download": False,
+
+        # 启用无头模式（headless），适合定时任务、服务器环境
+        edge_options.add_argument('--headless')
+        edge_options.add_argument('--disable-gpu')
+
+        # 动态创建临时 user-data-dir，避免目录冲突
+        temp_user_data_dir = tempfile.mkdtemp()
+        edge_options.add_argument(f'--user-data-dir={temp_user_data_dir}')
+
+        # 配置Edge下载目录
+        edge_options.add_experimental_option("prefs", {
+            "download.default_directory": xhs_file_path,  # 设置下载目录
+            "download.prompt_for_download": False,       # 不提示保存对话框
             "download.directory_upgrade": True,
             "safebrowsing.enabled": True
-        }
-        edge_options.add_experimental_option("prefs", prefs)
+        })
 
-        # 当 cookies_file 为空时可以选择不初始化 driver（仅用于数据合并）
-        if self.cookies_file:
-            print(f"使用本地 EdgeDriver 路径: {driver_path}")
-            self.driver = webdriver.Edge(
-                service=Service(driver_path),
-                options=edge_options
-            )
-            self.driver.maximize_window()
-        else:
-            self.driver = None
+        # 初始化 Edge 浏览器
+        self.driver = webdriver.Edge(
+            service=Service(driver_path),
+            options=edge_options
+        )
+
+        # 无头模式下无需最大化窗口，注释掉以下代码
+        # self.driver.maximize_window()
 
     def run(self):
         try:
