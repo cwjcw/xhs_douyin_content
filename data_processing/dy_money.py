@@ -28,13 +28,23 @@ class Dividend:
 
     def get_jdy_data_cached(self):
         """
-        缓存获取简道云数据，避免重复调用接口。
+        缓存获取简道云"内容管理"表格的数据，避免重复调用接口。
         使用固定的 appId 与 entryId（分别为 "67c280b7c6387c4f4afd50ae" 和 "67c2816ffa795e84a8fe45b9"）来获取数据。
         """
+        data_filter = {
+        "rel": "and",  
+        "cond": [
+                {
+                    "field": "_widget_1741257105161",
+                    "method": "eq",
+                    "value": ['抖音']  
+                }
+            ]
+        }
         if self._cached_jdy_data is None:
             appId = "67c280b7c6387c4f4afd50ae"
             entryId = "67c2816ffa795e84a8fe45b9"
-            self._cached_jdy_data = self.jdy.get_jdy_data(app_id=appId, entry_id=entryId)
+            self._cached_jdy_data = self.jdy.get_jdy_data(app_id=appId, entry_id=entryId, data_filter=data_filter)
         return self._cached_jdy_data
 
     def get_custom_count(self):
@@ -273,6 +283,7 @@ class Dividend:
 
 if __name__ == '__main__':
     dividend = Dividend()
+    dividend.get_jdy_data_cached()
     # print(dividend.total_money_dy())
     # print(dividend.get_custom_count()['客资数'].sum())
     # video_people = dividend.get_video_people()
@@ -282,4 +293,4 @@ if __name__ == '__main__':
     # data = dividend.video_dividend()
     # data.to_excel('视频分红.xlsx', index=False)
     # dividend.upload_to_jdy()
-    print(dividend.get_custom_count())
+    # print(dividend.get_custom_count())
