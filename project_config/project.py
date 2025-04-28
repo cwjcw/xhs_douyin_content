@@ -40,17 +40,17 @@ fields = [
 
 
 xhs_cookie_list = [
-        "xhs_336283533.pkl",
-        "xhs_345630498.pkl",
-        "xhs_348492471.pkl",
-        "xhs_348499654.pkl",
+        # "xhs_336283533.pkl",
+        # "xhs_345630498.pkl",
+        # "xhs_348492471.pkl",
+        # "xhs_348499654.pkl",
         "xhs_485899710.pkl",
         # "xhs_672578639.pkl",
-        "xhs_713752297I.pkl",
-        "xhs_1159005953.pkl",
+        # "xhs_713752297I.pkl",
+        # "xhs_1159005953.pkl",
         "xhs_2690270173.pkl",
-        "xhs_4235229252.pkl",
-        "xhs_26501332556.pkl",
+        # "xhs_4235229252.pkl",
+        # "xhs_26501332556.pkl",
         "xhs_yayun92.pkl"
     ]
 
