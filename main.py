@@ -11,17 +11,18 @@ from project_config.project import dy_file_path, xhs_cookie_list
 from spiders.xhs import Xhs
 from data_processing.xhs_money import XhsDividend
 
+# 获取项目根目录
+project_root = os.path.dirname(os.path.abspath(__file__))
+
+# 指向 spiders 目录
+spiders_dir = os.path.join(project_root, 'pkl')
+
 
 # 创建简道云对象
 jdy = jdy.JDY()
 #############################################################################################
 # 下载抖音数据
 
-# 获取项目根目录
-project_root = os.path.dirname(os.path.abspath(__file__))
-
-# 指向 spiders 目录
-spiders_dir = os.path.join(project_root, 'pkl')
 
 # 自动获取所有包含 'dy' 且以 .pkl 结尾的文件
 cookie_list = [f for f in os.listdir(spiders_dir) if 'douyin' in f and f.endswith('.pkl')]
@@ -46,13 +47,13 @@ else:
 # 获取抖音新增的视频质量数量，包括播放，点赞，收藏，评论，分享，收藏等
 
 dividend = Dividend()
-# print(dividend.total_money_dy())
-# print(dividend.get_custom_count()['客资数'].sum())
-video_people = dividend.get_video_people()
-# video_people.to_excel('抖音视频管理.xlsx', index=False)
-people_money = dividend.everyone_money()  # 每人应分金额
-# people_money.to_excel('抖音每人分红金额.xlsx', index=False)
-data = dividend.video_dividend()
+# # print(dividend.total_money_dy())
+# # print(dividend.get_custom_count()['客资数'].sum())
+# video_people = dividend.get_video_people()
+# # video_people.to_excel('抖音视频管理.xlsx', index=False)
+# people_money = dividend.everyone_money()  # 每人应分金额
+# # people_money.to_excel('抖音每人分红金额.xlsx', index=False)
+# data = dividend.video_dividend()
 # data.to_excel('抖音视频分红.xlsx', index=False)
 dividend.upload_to_jdy()
 
@@ -90,11 +91,11 @@ else:
 xhsdividend = XhsDividend()
 # print(xhsdividend.total_money_dy())
 # print(xhsdividend.get_custom_count()['客资数'].sum())
-video_people = xhsdividend.get_video_people()
-# video_people.to_excel('小红书视频管理.xlsx', index=False)
-people_money = xhsdividend.everyone_money()
-# people_money.to_excel('小红书每人分红金额.xlsx', index=False)
-data = xhsdividend.video_dividend()
+# video_people = xhsdividend.get_video_people()
+# # video_people.to_excel('小红书视频管理.xlsx', index=False)
+# people_money = xhsdividend.everyone_money()
+# # people_money.to_excel('小红书每人分红金额.xlsx', index=False)
+# data = xhsdividend.video_dividend()
 # data.to_excel('小红书视频分红.xlsx', index=False)
 xhsdividend.upload_to_jdy()
 

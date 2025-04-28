@@ -34,10 +34,20 @@ class XhsDividend:
         """
         从简道云获取并缓存数据，避免重复调用。
         """
+        data_filter = {
+        "rel": "and",  
+        "cond": [
+                {
+                    "field": "_widget_1741257105161",
+                    "method": "eq",
+                    "value": ['小红书']  
+                }
+            ]
+        }
         if self._cached_jdy_data is None:
             appId = "67c280b7c6387c4f4afd50ae"
             entryId = "67c2816ffa795e84a8fe45b9"
-            self._cached_jdy_data = self.jdy.get_jdy_data(app_id=appId, entry_id=entryId)
+            self._cached_jdy_data = self.jdy.get_jdy_data(app_id=appId, entry_id=entryId, data_filter=data_filter)
         return self._cached_jdy_data
 
     def get_custom_count(self):
