@@ -172,5 +172,4 @@ cython_debug/
 *.pkl
 project_config/
 *.xlsx
-pkl/
 *.sql
