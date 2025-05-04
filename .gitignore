@@ -170,6 +170,8 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 *.pkl
-project_config/
 *.xlsx
 *.sql
+project.py
+*.exe
+__pycache__/
