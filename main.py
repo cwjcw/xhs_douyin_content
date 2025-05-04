@@ -1,38 +1,55 @@
-from data_processing.dy_video_analysis import DailyDataProcessor
-from spiders import douyin, xhs
-from data_processing import dy_video_analysis, xhs_video_analysis
+import sys
+import os
+from pathlib import Path
 
-# 创建浏览器对象，并下载data.xlsx
-dy_spider = douyin.Douyin("https://creator.douyin.com/creator-micro/home")
-dy_spider.run()
+# 手动注入项目根目录到 sys.path
+project_root = Path(__file__).resolve().parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+    print(f"✅ 添加项目根路径: {project_root}")
+else:
+    print(f"✅ 项目根路径已存在: {project_root}")
 
-#############################################################################################
-# 获取抖音新增的视频质量数量，包括播放，点赞，收藏，评论，分享，收藏等
-processor = DailyDataProcessor()
-daily_data = processor.get_daily_data()
-print(daily_data.head)
-daily_data.to_excel(r'C:\Users\Administrator\Desktop\临时文件\daily.xlsx',index=False)
+import logging
+from datetime import datetime
+# from spiders.douyin import Douyin
+from spiders.xhs import Xhs
 
-#############################################################################################
+# ========== 日志配置 ==========
+log_dir = "logs"
+log_file = f"{log_dir}/run_{datetime.now().strftime('%Y-%m-%d')}.log"
 
+import os
+os.makedirs(log_dir, exist_ok=True)
 
+logging.basicConfig(
+    filename=log_file,
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
-#############################################################################################
-# 上传当天的视频分红
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+console.setFormatter(formatter)
+logging.getLogger('').addHandler(console)
 
+# ========== 主程序入口 ==========
+if __name__ == "__main__":
+    logging.info("📦 程序启动")
 
-#############################################################################################
-# 对数据进行转化处理
-processor.update_yesterday_data()
+    # try:
+    #     logging.info("▶ 开始处理 Douyin 数据")
+    #     Douyin.run_all()
+    #     logging.info("✅ Douyin 处理完成")
+    # except Exception as e:
+    #     logging.error(f"❌ Douyin 出错: {e}")
 
+    try:
+        logging.info("▶ 开始处理 XHS 数据")
+        Xhs.run_all()
+        logging.info("✅ XHS 处理完成")
+    except Exception as e:
+        logging.error(f"❌ XHS 出错: {e}")
 
-
-
-
-
-
-
-
-
-
-
+    logging.info("🏁 程序结束")

@@ -12,13 +12,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver import ActionChains
-# 获取当前脚本所在目录 (data_processing目录)
-current_dir = os.path.dirname(os.path.abspath(__file__))
-# 获取项目根目录（即当前目录的上一级）
-project_root = os.path.abspath(os.path.join(current_dir, ".."))
-# 将项目根目录添加到sys.path中
-if project_root not in sys.path:
-    sys.path.append(project_root)
+
+# 自动添加项目根目录到 sys.path
+from utils.init_path import setup_project_root
+setup_project_root()
 from project_config.project import xhs_cookie_list, xhs_file_path, driver_path
 
 

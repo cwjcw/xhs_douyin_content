@@ -1,24 +1,23 @@
-import os
+from pathlib import Path
 
-# 当前文件在 project_config 目录下，退回到项目根目录
-base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-# edge文件路径
-driver_path = os.path.join(base_dir, 'project_config', 'msedgedriver.exe')
+# 小红书路径
+xhs_file_path = BASE_DIR / "xlsx_file" / "xhs"
+xhs_data_path = xhs_file_path / "汇总笔记列表明细表.xlsx"
+xhs_yesterday_path = xhs_file_path / "yesterday.xlsx"
 
-# 小红薯文件
-xhs_file_path = os.path.join(base_dir, 'xlsx_file', 'xhs')
-xhs_data_path = os.path.join(xhs_file_path,'汇总笔记列表明细表.xlsx')
-xhs_yesterday_path = os.path.join(xhs_file_path,'yesterday.xlsx')
+# 抖音路径
+dy_file_path = BASE_DIR / "xlsx_file" / "douyin"
+dy_data_path = dy_file_path / "douyin_汇总数据.xlsx"
+dy_yesterday_path = dy_file_path / "yesterday.xlsx"
 
-# 抖音文件
-dy_file_path = os.path.join(base_dir, 'xlsx_file', 'douyin')
-dy_data_path = os.path.join(dy_file_path,'douyin_汇总数据.xlsx')
-dy_yesterday_path = os.path.join(dy_file_path,'yesterday.xlsx')
+# 驱动路径
+driver_path = BASE_DIR / "project_config" / "msedgedriver.exe"
 
+# Cookie 路径
+pkl_path = BASE_DIR / "pkl"
 
-# 存放pkl文件的路径
-pkl_path = os.path.join(base_dir,'pkl')
 
 # 字段映射关系（name到label）
 fields = [
@@ -67,6 +66,6 @@ dy_cookie_list = [
     "douyin_BJ_520.pkl"
 ]
 
-if __name__ == 'main':
+if __name__ == '__main__':
     print(dy_file_path)
 
