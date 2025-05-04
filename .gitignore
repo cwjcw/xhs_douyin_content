@@ -172,6 +172,5 @@ cython_debug/
 *.pkl
 *.xlsx
 *.sql
-project.py
 *.exe
 __pycache__/

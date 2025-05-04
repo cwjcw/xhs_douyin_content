@@ -1,24 +1,25 @@
-import os, sys
 import pickle
 import time
 import glob
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.edge.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.edge.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver import ActionChains
 
 # 自动添加项目根目录到 sys.path
 from utils.init_path import setup_project_root
 setup_project_root()
 from project_config.project import (
-    xhs_file_path, driver_path, pkl_path, get_full_cookie_paths
+    xhs_file_path, driver_path, pkl_path
 )
+
+# 动态获取 XHS Cookie 路径列表
+def get_xhs_cookie_paths():
+    return [str(p.resolve()) for p in pkl_path.glob("xhs_*.pkl") if p.suffix == ".pkl"]
 
 class Xhs:
     def __init__(self, url, cookies_file, download_path=xhs_file_path):
@@ -166,7 +167,7 @@ class Xhs:
     @classmethod
     def run_all(cls):
         print("📊 开始运行 run_all()：处理所有 XHS 账号")
-        full_paths = get_full_cookie_paths("xhs", pkl_path)
+        full_paths = get_xhs_cookie_paths()
         print("🧾 Cookie 路径列表：")
         for p in full_paths:
             print(" -", p)
@@ -184,6 +185,7 @@ class Xhs:
                 print(f"❌ 账号处理失败：{full_path}，错误：{e}")
 
         print("📁 准备合并 Excel 文件...")
+        print("🔄 开始合并 Excel 文件...")
         merged_instance = cls(url="https://creator.xiaohongshu.com/statistics/data-analysis", cookies_file="")
         final_df = merged_instance.merge_and_cleanup_xlsx_files()
         if final_df is not None:

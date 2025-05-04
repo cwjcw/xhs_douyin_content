@@ -1,24 +1,25 @@
-import os, sys
+import pickle
 import time
 import glob
-import pickle
-# 忽略 openpyxl 样式警告
-import warnings
-warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
 import pandas as pd
 from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.edge.service import Service
-from selenium.webdriver.edge.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.edge.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 # 自动添加项目根目录到 sys.path
 from utils.init_path import setup_project_root
 setup_project_root()
+from project_config.project import (
+    driver_path, pkl_path, dy_file_path
+)
 
-from project_config.project import driver_path, pkl_path, get_full_cookie_paths, dy_file_path
+# 动态获取 Douyin Cookie 路径列表
+def get_douyin_cookie_paths():
+    return [str(p.resolve()) for p in pkl_path.glob("douyin_*.pkl") if p.suffix == ".pkl"]
 
 class Douyin:
     def __init__(self, url, cookies_file):
@@ -61,8 +62,6 @@ class Douyin:
         self.wait_for_page_ready()
         self.click_tgzp_tab()
         self.click_post_list_tab()
-        # self.input_start_date()
-        # self.input_end_date()
         self.click_export_data_button()
 
     def wait_for_page_ready(self, timeout=30):
@@ -91,33 +90,6 @@ class Douyin:
             print("✅ 点击“投稿列表”成功")
         except Exception as e:
             print(f"❌ 点击“投稿列表”失败: {e}")
-
-    def input_start_date(self):
-        locator = (By.XPATH, "//div[@id='semiTabPanel1']//input[@placeholder='开始日期']")
-        ninety_days_ago = datetime.now() - timedelta(days=90)
-        min_date = datetime(2025, 3, 4)
-        target_date = max(ninety_days_ago, min_date).strftime("%Y-%m-%d")
-        self._fill_date(locator, target_date, "开始日期")
-
-    def input_end_date(self):
-        locator = (By.XPATH, "//div[@id='semiTabPanel1']//input[@placeholder='结束日期']")
-        target_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-        self._fill_date(locator, target_date, "结束日期")
-
-    def _fill_date(self, locator, date_str, label):
-        try:
-            input_element = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located(locator)
-            )
-            self.driver.execute_script("arguments[0].removeAttribute('readonly')", input_element)
-            self.driver.execute_script("arguments[0].value = arguments[1];", input_element, date_str)
-            self.driver.execute_script("""
-                arguments[0].dispatchEvent(new Event('input', { bubbles: true }));
-                arguments[0].dispatchEvent(new Event('change', { bubbles: true }));
-            """, input_element)
-            print(f"✅ 输入{label}：{date_str}")
-        except Exception as e:
-            print(f"❌ 设置{label}失败: {e}")
 
     def click_export_data_button(self):
         locator = (By.XPATH, "//div[contains(@class,'container-ttkmFy')]//button[.//span[text()='导出数据']]")
@@ -156,6 +128,7 @@ class Douyin:
 
     @classmethod
     def merge_xlsx_files(cls, output_path):
+        print("🔄 开始合并 Excel 文件...")
         all_files = glob.glob(os.path.join(output_path, "*data*.xlsx"))
         df_list = []
         for file in all_files:
@@ -175,20 +148,28 @@ class Douyin:
             print("❌ 没有可合并的xlsx文件")
             return
 
-        # 删除合并前的单个数据文件
         cls.cleanup_temp_files(output_path, keyword="data")
 
     @classmethod
     def run_all(cls):
-        cookie_paths = get_full_cookie_paths("douyin", pkl_path)
+        print("📊 开始运行 run_all()：处理所有 Douyin 账号")
+        cookie_paths = get_douyin_cookie_paths()
+        print("🧾 Cookie 路径列表：")
+        for p in cookie_paths:
+            print(" -", p)
+
+        if not cookie_paths:
+            print("❌ 未找到任何 cookie 文件，任务终止")
+            return
+
         for cookie_file in cookie_paths:
-            print(f"\n🌐 当前账号: {cookie_file}")
+            print(f"\n================ 当前账号: {cookie_file} ================\n")
             douyin = cls("https://creator.douyin.com/creator-micro/home", cookie_file)
             douyin.run()
             print("⏳ 等待下载完成...")
             time.sleep(15)
 
-        print("\n📁 开始合并所有Excel文件...")
+        print("\n📁 准备合并 Excel 文件...")
         cls.merge_xlsx_files(str(dy_file_path))
 
 if __name__ == "__main__":
