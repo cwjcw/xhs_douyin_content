@@ -22,3 +22,6 @@
 ## 数据处理部分，在data_processing文件夹中
 - 可以先从后台下载对应的excel文件，清空标题以外的内容，命名为yesterday.xlsx
 - 系统会自动下载data.xlsx,并在处理完后，自动将data.xlsx命名为yesterday.xlsx
+
+# 有不明白的可以加群聊，大家多互动
+![微信图片_20250509102804](https://github.com/user-attachments/assets/92df7572-981b-45ea-bba5-716dc73373cc)
