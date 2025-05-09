@@ -40,33 +40,42 @@ fields = [
 
 
 xhs_cookie_list = [
-        # "xhs_336283533.pkl",
-        # "xhs_345630498.pkl",        
-        # "xhs_348499654.pkl",
-        # "xhs_348492471.pkl",
-        # "xhs_485899710.pkl",
-        # "xhs_672578639.pkl",
-        # "xhs_713752297I.pkl",
-        # "xhs_1159005953.pkl",
-        # "xhs_2690270173.pkl",
-        # "xhs_4235229252.pkl",
-        # "xhs_26501332556.pkl",
-        # "xhs_yayun92.pkl",
-        # "xhs_94171441468.pkl",
-        # "xhs_26734976155.pkl",
-        # ""
-        "xhs.pkl"
+        "xhs_336283533.pkl",
+        "xhs_345630498.pkl",        
+        "xhs_348499654.pkl",
+        "xhs_348492471.pkl",
+        "xhs_485899710.pkl",
+        "xhs_672578639.pkl",
+        "xhs_713752297I.pkl",
+        "xhs_1159005953.pkl",
+        "xhs_2690270173.pkl",
+        "xhs_4235229252.pkl",
+        "xhs_26501332556.pkl",
+        "xhs_yayun92.pkl",
+        "xhs_94171441468.pkl",
+        "xhs_26734976155.pkl",
+        "xhs_25115715549.pkl",
+        "xhs_26790649799.pkl",
+        "xhs_bjmddhl.pkl",
+        "xhs_V17750638826.pkl"
+        # "xhs.pkl"
     ]
 
 dy_cookie_list = [
-    # "douyin_44698605892.pkl",
-    # "douyin_bojuegz.pkl",
-    # "douyin_bojuexiamen.pkl",
-    # "douyin_NCHQYX520.pkl",
-    # "douyin_53693141223.pkl",
-    # "douyin_BJ_520.pkl",
-    # ""
-    "dy.pkl"
+    "douyin_44698605892.pkl",
+    "douyin_bojuegz.pkl",
+    "douyin_bojuexiamen.pkl",
+    "douyin_NCHQYX520.pkl",
+    "douyin_53693141223.pkl",
+    "douyin_BJ_520.pkl"
+    "douyin_1159005953.pkl",
+    "douyin_46579786196.pkl",
+    "douyin_48611326580.pkl",
+    "douyin_bojueDL.pkl",
+    "douyin_bojueDL.pkl",
+    "douyin_QQQ00726.pkl",
+    # "douyin.pkl"
+
 ]
 
 if __name__ == 'main':

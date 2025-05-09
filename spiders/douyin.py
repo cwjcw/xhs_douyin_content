@@ -2,9 +2,9 @@ import os, sys
 import time
 import glob
 import pickle
-# 忽略 openpyxl 样式警告
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
+
 import pandas as pd
 from datetime import datetime, timedelta
 from selenium import webdriver
@@ -13,6 +13,7 @@ from selenium.webdriver.edge.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
 # 获取当前脚本所在目录 (data_processing目录)
 current_dir = os.path.dirname(os.path.abspath(__file__))
 # 获取项目根目录（即当前目录的上一级）
@@ -20,20 +21,11 @@ project_root = os.path.abspath(os.path.join(current_dir, ".."))
 # 将项目根目录添加到sys.path中
 if project_root not in sys.path:
     sys.path.append(project_root)
+
 from project_config.project import driver_path, dy_cookie_list
 
 # 下载文件保存目录
 dy_file_path = r'E:\douyin_xhs_data\douyin'
-
-# 多个 cookie 文件名，放在和 .py 脚本同一目录
-# cookie_list = [
-#     "douyin_44698605892.pkl",
-#     "douyin_bojuegz.pkl",
-#     "douyin_bojuexiamen.pkl",
-#     "douyin_NCHQYX520.pkl",
-#     "douyin_53693141223.pkl",
-#     "douyin_BJ_520.pkl"
-# ]
 
 class Douyin:
     def __init__(self, url, cookies_file):
@@ -41,16 +33,14 @@ class Douyin:
         self.cookies_file = cookies_file
         self.data_center_url = "https://creator.douyin.com/creator-micro/data-center/content"
 
-        # 配置Edge下载目录
         edge_options = Options()
         edge_options.add_experimental_option("prefs", {
-            "download.default_directory": dy_file_path,  # 设置下载目录
-            "download.prompt_for_download": False,       # 不提示保存对话框
+            "download.default_directory": dy_file_path,
+            "download.prompt_for_download": False,
             "download.directory_upgrade": True,
             "safebrowsing.enabled": True
         })
 
-        # 使用自定义的 driver_path
         self.driver = webdriver.Edge(
             service=Service(driver_path),
             options=edge_options
@@ -58,29 +48,46 @@ class Douyin:
         self.driver.maximize_window()
 
     def load_cookies(self):
-        try:
-            with open(self.cookies_file, "rb") as cookie_file:
-                cookies = pickle.load(cookie_file)
-                self.driver.get(self.url)
-                self.driver.delete_all_cookies()
-                for cookie in cookies:
-                    if 'expiry' in cookie:
-                        cookie['expiry'] = int(cookie['expiry'])
-                    self.driver.add_cookie(cookie)
-                self.driver.refresh()
-                print(f"✅ Loaded cookies from {self.cookies_file}")
-                self._post_login_flow()
-        except FileNotFoundError:
-            print(f"❌ Cookie file not found: {self.cookies_file}")
+        self.driver.get(self.url)  # 无论如何都先打开首页
+
+        if os.path.exists(self.cookies_file):
+            try:
+                with open(self.cookies_file, "rb") as cookie_file:
+                    cookies = pickle.load(cookie_file)
+                    self.driver.delete_all_cookies()
+                    for cookie in cookies:
+                        if 'expiry' in cookie:
+                            cookie['expiry'] = int(cookie['expiry'])
+                        self.driver.add_cookie(cookie)
+                    self.driver.refresh()
+                    print(f"✅ 已加载 cookie 文件：{self.cookies_file}")
+            except Exception as e:
+                print(f"❌ 加载 cookie 出错: {e}")
+        else:
+            print(f"📸 请扫码登录：{self.cookies_file}")
+            try:
+                WebDriverWait(self.driver, 180).until(
+                    lambda d: "creator.douyin.com/creator-micro/home" in d.current_url
+                )
+                print("✅ 登录成功，开始保存 cookie...")
+                cookies = self.driver.get_cookies()
+                with open(self.cookies_file, "wb") as f:
+                    pickle.dump(cookies, f)
+                print(f"✅ Cookie 已保存到：{self.cookies_file}")
+            except Exception as e:
+                print(f"❌ 登录超时或出错：{e}")
+                return  # 不再继续流程
+
+        self._post_login_flow()
 
     def _post_login_flow(self):
         self.driver.get(self.data_center_url)
         self.wait_for_page_ready()
         self.click_tgzp_tab()
-        self.click_post_list_tab()
-        self.input_start_date()
-        self.input_end_date()
-        self.click_export_data_button()
+        # self.click_post_list_tab()
+        # self.input_start_date()
+        # self.input_end_date()
+        # self.click_export_data_button()
 
     def wait_for_page_ready(self, timeout=30):
         WebDriverWait(self.driver, timeout).until(
@@ -186,7 +193,7 @@ if __name__ == "__main__":
         douyin = Douyin("https://creator.douyin.com/creator-micro/home", full_cookie_path)
         douyin.run()
         print("⏳ 等待下载完成...")
-        time.sleep(15)  # 视网络情况可增大等待时间
+        time.sleep(15)
 
     print("\n📁 开始合并所有Excel文件...")
     merge_xlsx_files(dy_file_path)

@@ -100,7 +100,7 @@ class Xhs:
         # self.click_post_list_tab()
         # self.input_start_date()
         # self.input_end_date()
-        self.click_export_data_button()
+        # self.click_export_data_button()
 
     def go_to_data_center(self):
         print("🚀 Navigating to data center...")
