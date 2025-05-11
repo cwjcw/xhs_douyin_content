@@ -62,18 +62,17 @@ xhs_cookie_list = [
     ]
 
 dy_cookie_list = [
-    "douyin_44698605892.pkl",
+    # "douyin_44698605892.pkl",
     "douyin_bojuegz.pkl",
-    "douyin_bojuexiamen.pkl",
-    "douyin_NCHQYX520.pkl",
-    "douyin_53693141223.pkl",
-    "douyin_BJ_520.pkl"
-    "douyin_1159005953.pkl",
+    # "douyin_bojuexiamen.pkl",
+    # "douyin_NCHQYX520.pkl",
+    # "douyin_53693141223.pkl",
+    "douyin_BJ_520.pkl",
+    # "douyin_1159005953.pkl",
     "douyin_46579786196.pkl",
     "douyin_48611326580.pkl",
-    "douyin_bojueDL.pkl",
-    "douyin_bojueDL.pkl",
-    "douyin_QQQ00726.pkl",
+    # "douyin_bojueDL.pkl",
+    # "douyin_QQQ00726.pkl",
     # "douyin.pkl"
 
 ]

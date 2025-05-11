@@ -84,10 +84,10 @@ class Douyin:
         self.driver.get(self.data_center_url)
         self.wait_for_page_ready()
         self.click_tgzp_tab()
-        # self.click_post_list_tab()
-        # self.input_start_date()
-        # self.input_end_date()
-        # self.click_export_data_button()
+        self.click_post_list_tab()
+        self.input_start_date()
+        self.input_end_date()
+        self.click_export_data_button()
 
     def wait_for_page_ready(self, timeout=30):
         WebDriverWait(self.driver, timeout).until(
