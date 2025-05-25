@@ -53,8 +53,8 @@ dividend = Dividend()
 # # video_people.to_excel('抖音视频管理.xlsx', index=False)
 # people_money = dividend.everyone_money()  # 每人应分金额
 # # people_money.to_excel('抖音每人分红金额.xlsx', index=False)
-# data = dividend.video_dividend()
-# data.to_excel('抖音视频分红.xlsx', index=False)
+data = dividend.video_dividend()
+data.to_excel('抖音视频分红.xlsx', index=False)
 dividend.upload_to_jdy()
 
 # #############################################################################################
@@ -95,8 +95,8 @@ xhsdividend = XhsDividend()
 # # video_people.to_excel('小红书视频管理.xlsx', index=False)
 # people_money = xhsdividend.everyone_money()
 # # people_money.to_excel('小红书每人分红金额.xlsx', index=False)
-# data = xhsdividend.video_dividend()
-# data.to_excel('小红书视频分红.xlsx', index=False)
+data = xhsdividend.video_dividend()
+data.to_excel('小红书视频分红.xlsx', index=False)
 xhsdividend.upload_to_jdy()
 
 # #############################################################################################
