@@ -20,17 +20,8 @@ project_root = os.path.abspath(os.path.join(current_dir, ".."))
 # 将项目根目录添加到sys.path中
 if project_root not in sys.path:
     sys.path.append(project_root)
-from project_config.project import driver_path, dy_file_path
+from project_config.project import driver_path, dy_file_path, pkl_path, douyin_cookie_list
 
-# 多个 cookie 文件名，放在和 .py 脚本同一目录
-cookie_list = [
-    "douyin_44698605892.pkl",
-    "douyin_bojuegz.pkl",
-    "douyin_bojuexiamen.pkl",
-    "douyin_NCHQYX520.pkl",
-    "douyin_53693141223.pkl",
-    "douyin_BJ_520.pkl"
-]
 
 class Douyin:
     def __init__(self, url, cookies_file):
@@ -199,8 +190,8 @@ def merge_xlsx_files(output_path):
 if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
-    for cookie_file in cookie_list:
-        full_cookie_path = os.path.join(script_dir, cookie_file)
+    for cookie_file in douyin_cookie_list:
+        full_cookie_path = os.path.join(pkl_path, cookie_file)
         print(f"\n🌐 当前账号: {cookie_file}")
         douyin = Douyin("https://creator.douyin.com/creator-micro/home", full_cookie_path)
         douyin.run()
