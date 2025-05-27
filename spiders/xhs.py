@@ -301,7 +301,7 @@ class Xhs:
 
 if __name__ == "__main__":
     # 调用 process_all_accounts 方法处理所有账号并返回合并后的 DataFrame
-    final_df = Xhs.process_all_accounts(xhs_cookie_list)
+    final_df = Xhs.process_all_accounts(["xhs.pkl"])
     if final_df is not None:
         print("✅ 最终合并的 DataFrame：")
         print(final_df.head())

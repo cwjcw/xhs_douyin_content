@@ -6,8 +6,8 @@ df = pd.read_excel(file_path)
 
 # 总金额
 platform_totals = {
-    '抖音': 1400,
-    '小红书': 3200
+    '抖音': 700,
+    '小红书': 2150
 }
 
 # 按平台统计每个data_id数量
