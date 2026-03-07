@@ -24,4 +24,3 @@
 - 系统会自动下载data.xlsx,并在处理完后，自动将data.xlsx命名为yesterday.xlsx
 
 # 有不明白的可以加群聊，大家多互动
-![微信图片_20250509102804](https://github.com/user-attachments/assets/92df7572-981b-45ea-bba5-716dc73373cc)
